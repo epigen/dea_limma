@@ -1,0 +1,1 @@
+A `Snakemake workflow for performing and visualizing differential expression analyses (DEA) <https://github.com/epigen/dea_limma>`_ on NGS data powered by the R package `limma <https://doi.org/doi:10.18129/B9.bioc.limma>`_.

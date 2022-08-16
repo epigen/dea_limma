@@ -1,0 +1,62 @@
+
+##### libraries #####
+import os
+import sys
+import pandas as pd
+import yaml
+from snakemake.utils import min_version
+
+min_version("6.0.3")
+
+SDIR = os.path.realpath(os.path.dirname(srcdir("Snakefile")))
+shell.prefix(f"set -eo pipefail;")
+
+##### container image #####
+# containerized: "docker://sreichl/..."
+
+##### setup report #####
+report: os.path.join("report", "workflow.rst")
+
+##### load config and sample annotation sheets #####
+configfile: os.path.join("config", "config.yaml")
+
+# load annotation
+annot = pd.read_csv(config['annotation'], index_col='name')
+analyses = list(annot.index)
+# convert dictionary for parametrization of rules
+annot_dict = annot.to_dict('index')
+# print(annot_dict)
+
+result_path = os.path.join(config["result_path"],'dea_limma')
+
+rule all:
+    input:
+        dea_results = expand(os.path.join(result_path,'{analysis}','DEA_results.csv'),
+                            analysis = analyses,
+                           ),
+        dea_volcanos = expand(os.path.join(result_path,'{analysis}','plots','DEA_volcanos.png'),
+                            analysis = analyses,
+                           ),
+        dea_stats = expand(os.path.join(result_path,'{analysis}','DEA_stats.csv'),
+                               analysis = analyses,
+                              ),
+        dea_lfc_heatmap = expand(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap.png'),
+                               analysis = analyses,
+                              ),
+        envs = expand(os.path.join(config["result_path"],'envs','dea_limma','{env}.yaml'),env=['limma','volcanos','ggplot','heatmap']),
+        configs = os.path.join(config["result_path"],'configs','dea_limma','{}_config.yaml'.format(config["project_name"])),
+        annotations = config["annotation"],
+    resources:
+        mem_mb=config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    log:
+        os.path.join("logs","rules","all.log"),
+    params:
+        partition=config.get("partition"),
+
+        
+##### load rules #####
+include: os.path.join("rules", "common.smk")
+include: os.path.join("rules", "dea.smk")
+include: os.path.join("rules", "visualize.smk")
+include: os.path.join("rules", "envs_export.smk")

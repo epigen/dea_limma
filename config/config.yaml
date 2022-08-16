@@ -3,7 +3,7 @@
 
 ##### RESOURCES #####
 mem: '32000'
-threads: 2
+threads: 1
 partition: 'shortq'
 
 ##### GENERAL #####
@@ -12,28 +12,24 @@ result_path: /nobackup/lab_bock/projects/macroIC/results/CC001/
 project_name: CC001
 
 
-##### TO BE CHANGED #####
-
 ##### DEA #####
 
-# parameters for https://satijalab.org/seurat/reference/findmarkers
-logfc_threshold: 0.1
-test_use: "wilcox"
-min_pct: 0.1
-
-# additional parameter for https://satijalab.org/seurat/reference/findallmarkers
-return_thresh: 1
+# EXPLAINATION HERE
+# also for blocing variable (block_var)
+reference_levels:
+    treatment: "UT"
+    time: "0h"
 
 ##### AGGREGATION #####
 # filters are applied to the DEA results and used for all outputs
 filters:
     adj_pval: 0.05
     lfc: 0.1
-    min_pct: 0.1
+    ave_expr: 0.1
 
 ##### VISUALIZATION #####
 
 # parameters for https://bioconductor.org/packages/release/bioc/html/EnhancedVolcano.html
 volcano:
     pCutoff: 0.05
-    FCcutoff: 0.1
+    FCcutoff: 2

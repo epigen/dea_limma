@@ -1,0 +1,1 @@
+Volcano plot panel visualizing DEA results of analysis {{snakemake.wildcards["analysis"]}}.

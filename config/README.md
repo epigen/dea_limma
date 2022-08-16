@@ -8,9 +8,10 @@ You need one configuration file and one annotation file to run the complete work
     -  data: absolute path to the input data as CSV file as feature by sample table (eg count matrix) that has already been quality controlled (eg bad samples removed) and filtered (eg only expressed genes)
     -  metadata: absolute path to the metadata for the required analysis (ie every variable in the formula needs to have a corresponding column)
     -  formula: ---
+    -  block_var: ----
     -  comparisons: ---
-    -  CalcNormfactors_method: ---
+    -  calcNormFactors_method: ---
     -  voom: ---
     -  eBayes: ---
     -  limma_trend: ---
-    -  blocking: ----
+
