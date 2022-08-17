@@ -8,14 +8,21 @@ partition: 'shortq'
 
 ##### GENERAL #####
 annotation: /research/home/sreichl/projects/macroIC/config/CC001_dea_limma_annotation.csv
+
+# (optional): EXLAINATION HERE
+feature_annotation:
+    path: /nobackup/lab_bock/projects/macroIC/results/CC001/counts/gene_annotation.csv
+    column: "external_gene_name"
+
 result_path: /nobackup/lab_bock/projects/macroIC/results/CC001/
+
 project_name: CC001
 
 
 ##### DEA #####
 
 # EXPLAINATION HERE
-# also for blocing variable (block_var)
+# note: also for blocking variable (block_var)
 reference_levels:
     treatment: "UT"
     time: "0h"

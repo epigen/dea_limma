@@ -34,7 +34,13 @@ volcano_plots <- list()
 
 for (group in unique(dea_results$group)){
     toptable <- dea_results[dea_results$group==group,]
-    lab <- toptable$genes
+    
+    if("feature_name" %in% colnames(toptable)){
+        lab <- toptable$feature_name
+    }else{
+        lab <- toptable$feature
+    }
+    
     x <- "logFC"
     y <- "adj.P.Val"
 
@@ -75,7 +81,7 @@ for (group in unique(dea_results$group)){
                     colGradientBreaks = c(pCutoff, 1),
                     colGradientLabels = c("0", "1.0"),
                     colGradientLimits = c(0, 1),
-                    legendLabels = c("NS", expression(avg. ~ log[2] ~ FC), "adj. p-value", 'both'),
+                    legendLabels = c("NS", expression(~ log[2] ~ FC), "adj. p-value", 'both'),
                     legendPosition = "right", #default: "top"
                     legendLabSize = 14,
                     legendIconSize = 4,

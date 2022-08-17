@@ -10,6 +10,7 @@ metadata_path <- snakemake@input[[2]] #"/nobackup/lab_bock/projects/macroIC/resu
 dea_result_path <- snakemake@output[["dea_results"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_results.csv" 
 
 # parameters
+feature_annotation <- snakemake@params[["feature_annotation"]] #list(path="/nobackup/lab_bock/projects/macroIC/results/CC001/counts/gene_annotation.csv", column="external_gene_name")
 reference_levels <- snakemake@params[["reference_levels"]] #list(treatment="UT", time="0h")
 design <- formula(snakemake@params[["formula"]]) #formula("~ treatment")
 block_var <- snakemake@params[["block_var"]] #0
@@ -36,6 +37,13 @@ print(dim(data))
 metadata <- read.csv(file=metadata_path, row.names=1,)
 print("metadata")
 print(dim(metadata))
+
+### load feature annotation file (optional)
+if (feature_annotation[["path"]]!=""){
+    feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1,)
+    print("feature_annot")
+    print(dim(feature_annot))
+}
 
 ### prepare DEA
 
@@ -145,6 +153,10 @@ for(coefx in colnames(coef(lmfit))){
         rownames(tmp_res) <- NULL
         tmp_res$group <- coefx
         
+        if (feature_annotation[["path"]]!=""){
+            tmp_res$feature_name <- feature_annot[tmp_res$genes, feature_annotation[["column"]]]
+        }
+    
         if(dim(dea_results)[1]==0){
             dea_results <- tmp_res
         }else{
@@ -152,6 +164,9 @@ for(coefx in colnames(coef(lmfit))){
         }
     }
 }
+
+# rename "genes" column to "feature"
+colnames(dea_results)[colnames(dea_results)=="genes"] <- "feature"
 
 ### save DEA results
 write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)

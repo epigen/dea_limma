@@ -14,6 +14,7 @@ rule dea:
         os.path.join("logs","rules","dea_{analysis}.log"),
     params:
         partition=config.get("partition"),
+        feature_annotation = config["feature_annotation"],
         reference_levels = config["reference_levels"],
         formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
         block_var = lambda w: annot_dict["{}".format(w.analysis)]["block_var"],

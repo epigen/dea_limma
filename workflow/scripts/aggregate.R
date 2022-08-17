@@ -33,9 +33,14 @@ dea_results <- read.csv(file=file.path(dea_result_path))
 
 
 ### save list of all expressed features for downstream analysis (eg as background in enrichment analyses)
-all_features <- unique(dea_results$genes)
+all_features <- unique(dea_results$feature)
 write(all_features, file.path(results_path, "ALL_features.txt"))
 
+if("feature_name" %in% colnames(dea_results)){
+    all_features_annot <- unique(dea_results$feature_name)
+    all_features_annot <- all_features_annot[all_features_annot != ""]
+    write(all_features_annot, file.path(results_path, "ALL_features_annot.txt"))
+}
 
 # annotate differential direction (up or down)
 dea_results$direction <- as.character(lapply(dea_results$logFC, function(x) if(x>0){"up"}else{"down"}))
@@ -53,26 +58,43 @@ write.csv(dea_filtered_stats_df, file=file.path(dea_stats_path), row.names=TRUE)
 
 ### aggregate & save LFC matrix from filtered DEA result features
 groups <- unique(dea_results$group)
-features <- unique(dea_filtered_results$genes)
+features <- unique(dea_filtered_results$feature)
                                              
 lfc_df <- data.frame(matrix(nrow=length(features), ncol=length(groups), dimnames=list(features, groups)))
 
 for (group in unique(dea_results$group)){
     tmp_dea_results <- dea_results[dea_results$group==group, ]
-    rownames(tmp_dea_results) <- tmp_dea_results$genes
+    rownames(tmp_dea_results) <- tmp_dea_results$feature
     lfc_df[features, group] <- tmp_dea_results[features, 'logFC']
 }
 
 write.csv(lfc_df, file=file.path(dea_filtered_lfc_path), row.names=TRUE)
+                                             
+if("feature_name" %in% colnames(dea_results)){
+    lfc_df$feature_name <- tmp_dea_results[rownames(lfc_df), 'feature_name']
+    lfc_df <- lfc_df[,c(ncol(lfc_df),1:(ncol(lfc_df)-1))]
+    write.csv(lfc_df, file=file.path(dirname(file.path(dea_stats_path)),"DEA_FILTERED_LFC_annot.csv"), row.names=FALSE)
+}
 
 ### save differential feature lists from filtered DEA results for downstream analysis                                             
 for (group in unique(dea_filtered_results$group)){
     for (direction in unique(dea_filtered_results$direction)){
         
-        tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"genes"]
+        tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature"]
         write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features.txt")))
     }
 }
+                                             
+if("feature_name" %in% colnames(dea_results)){
+    for (group in unique(dea_filtered_results$group)){
+        for (direction in unique(dea_filtered_results$direction)){
+
+            tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature_name"]
+            tmp_features <- tmp_features[tmp_features != ""]
+            write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features_annot.txt")))
+        }
+    }
+}                                             
                                              
 ### visualize & save DEA statistics
 width_panel <- length(groups) * width + 1
