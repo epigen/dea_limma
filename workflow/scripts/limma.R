@@ -108,9 +108,9 @@ if(block_var!=0){
     print("duplicateCorrelation")
     corr_fit <- duplicateCorrelation(v, model_matrix, block=block)
     print(corr_fit$consensus)
-    cons_correlation = corr_fit$consensus
+    cons_correlation <- corr_fit$consensus
     
-    # now it is potentially beneficial to voom again
+    # now it is potentially beneficial to voom again (slower)
     print("vooming")
     pdf(file=file.path(result_dir,"mean_var_trend_voom2.pdf"))
     v <- voom(dge, model_matrix, block=block, correlation=cons_correlation, plot=TRUE)
@@ -170,3 +170,4 @@ colnames(dea_results)[colnames(dea_results)=="genes"] <- "feature"
 
 ### save DEA results
 write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)
+

@@ -21,11 +21,13 @@ Table of contents
 - [Lukas Folkman](https://github.com/lukas-folkman)
 
 
+
 # Software
 This project wouldn't be possible without the following software and their dependencies:
 
 | Software       | Reference (DOI)                                   |
 | :------------: | :-----------------------------------------------: |
+| edgeR.         | https://doi.org/10.1093/bioinformatics/btp616  |
 | EnhancedVolcano| https://doi.org/10.18129/B9.bioc.EnhancedVolcano  |
 | ggplot2        | https://ggplot2.tidyverse.org/                    |
 | patchwork      | https://CRAN.R-project.org/package=patchwork      |

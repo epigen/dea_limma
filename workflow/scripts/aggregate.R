@@ -1,5 +1,6 @@
 #### load libraries & utility function 
 library(ggplot2)
+library(patchwork)
 
 # source utility functions
 source("workflow/scripts/utils.R")
@@ -117,3 +118,33 @@ ggsave_new(filename = "DEA_stats",
            plot=dea_results_p, 
            width=width_panel, 
            height=height)
+                                             
+                                             
+# plot P-value distribution as sanity check TODO: group in panels, save only one large plot, like volcanos, check BMDM DEA for alternative code
+pvalue_plots <- list()                                             
+                                             
+for (group in unique(dea_results$group)){
+    tmp_dea_results <- dea_results[dea_results$group==group, ]
+
+    pvalue_plots[[group]] <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + geom_histogram(bins=100) + theme_bw(16) + ggtitle(group) + custom_theme
+}
+                                             
+width <- 4
+height <- 4
+
+n_col <- min(10, length(unique(dea_results$group)))
+
+width_panel <- n_col * width + 1
+height_panel <- height * ceiling(length(unique(dea_results$group))/n_col)
+
+pvalue_plots_panel <- wrap_plots(pvalue_plots, ncol = n_col, guides = "collect")
+
+# save plot
+options(repr.plot.width=width_panel, repr.plot.height=height_panel)
+print(pvalue_plots_panel)
+
+ggsave_new(filename = "DEA_pvalue_distribution", 
+           results_path=dirname(dea_stats_plot_path), 
+           plot=pvalue_plots_panel, 
+           width=width_panel, 
+           height=height_panel)
