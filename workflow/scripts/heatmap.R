@@ -33,14 +33,18 @@ width_panel <- width * ncol(dea_lfc) + 3
 annot <- data.frame(group=colnames(dea_lfc))
 rownames(annot) <- colnames(dea_lfc)
 
+# format colnames for plotting
+colnames(dea_lfc) <- sapply(colnames(dea_lfc), addline_format)
+
 # make heatmap
 lfc_heatmap <- as.ggplot(pheatmap(dea_lfc, 
                show_rownames=F, 
                show_colnames=T,
-               angle_col = 90,
+               fontsize = 5,
+               angle_col = 45,
                treeheight_row = 25,
                treeheight_col = 10,
-               annotation_col = annot,
+#                annotation_col = annot,
                breaks=seq(-max(abs(dea_lfc)), max(abs(dea_lfc)), length.out=200),
                color=colorRampPalette(c("blue", "white", "red"))(200),
                                      annotation_names_col = F,

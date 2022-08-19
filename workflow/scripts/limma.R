@@ -1,6 +1,7 @@
 #### load libraries & utility function 
 library(limma)
 library(edgeR)
+library(statmod)
 
 # inputs
 data_path <- snakemake@input[[1]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/counts/thp1_filtered.csv"
@@ -49,10 +50,13 @@ if (feature_annotation[["path"]]!=""){
 
 # subset metadata with used columns and non-NA rows
 metadata_cols <- labels(terms(design))
+metadata_cols <- unique(unlist(lapply(metadata_cols, function(x) strsplit(x, ":", fixed = TRUE))))
 
 if (block_var!=0){
     metadata_cols <- c(metadata_cols, block_var)
 }
+print("relevant metadata")
+print(metadata_cols)
 
 metadata <- metadata[,metadata_cols,drop=FALSE]
 metadata <- na.omit(metadata)
@@ -74,12 +78,14 @@ for(col in names(reference_levels)){
     }
 }
 
-# create dge object
-dge <- DGEList(data, samples=metadata, genes=rownames(data))
 
 # calculate Normalization Factors (optional)
 if (calcNormFactors_method!=0){
+    # create dge object
+    dge <- DGEList(data, samples=metadata, genes=rownames(data))
     dge <- calcNormFactors(dge, method=calcNormFactors_method)
+}else{
+    dge <- data
 }
 
 # create model matrix
@@ -110,17 +116,20 @@ if(block_var!=0){
     print(corr_fit$consensus)
     cons_correlation <- corr_fit$consensus
     
-    # now it is potentially beneficial to voom again (slower)
-    print("vooming")
-    pdf(file=file.path(result_dir,"mean_var_trend_voom2.pdf"))
-    v <- voom(dge, model_matrix, block=block, correlation=cons_correlation, plot=TRUE)
-    x <- dev.off()
-    
-    # now it is potentially beneficial to calculate correlation again
-    print("duplicateCorrelation")
-    corr_fit <- duplicateCorrelation(v, model_matrix, block=block)
-    print(corr_fit$consensus)
-    cons_correlation <- corr_fit$consensus
+    # voom (optional)
+    if (voom_flag!=0){
+        # now it is potentially beneficial to voom again (slower)
+        print("vooming")
+        pdf(file=file.path(result_dir,"mean_var_trend_voom2.pdf"))
+        v <- voom(dge, model_matrix, block=block, correlation=cons_correlation, plot=TRUE)
+        x <- dev.off()
+
+        # now it is potentially beneficial to calculate correlation again
+        print("duplicateCorrelation")
+        corr_fit <- duplicateCorrelation(v, model_matrix, block=block)
+        print(corr_fit$consensus)
+        cons_correlation <- corr_fit$consensus
+    }
     
     print("fitting")
     lmfit = lmFit(v, model_matrix, block=block, correlation=cons_correlation)
@@ -136,9 +145,9 @@ x <- dev.off()
 # eBayes (optional) without or with limma-trend (optional)
 if (eBayes_flag!=0){
     if(limma_trend==0){
-        lmfit <- eBayes(lmfit, trend=FALSE)
+        lmfit <- eBayes(lmfit, robust=TRUE, trend=FALSE)
     }else{
-        lmfit <- eBayes(lmfit, trend=TRUE)
+        lmfit <- eBayes(lmfit, robust=TRUE, trend=TRUE)
     }
 }
 
@@ -150,11 +159,13 @@ for(coefx in colnames(coef(lmfit))){
         print(coefx)
         
         tmp_res <- topTable(lmfit, coef=coefx, number=nrow(data))
+        tmp_res$feature <- rownames(tmp_res)
+        tmp_res <- tmp_res[,c(ncol(tmp_res),1:(ncol(tmp_res)-1))]
         rownames(tmp_res) <- NULL
-        tmp_res$group <- coefx
+        tmp_res$group <- gsub(":", "__", coefx) # replace colon with double-underscore
         
         if (feature_annotation[["path"]]!=""){
-            tmp_res$feature_name <- feature_annot[tmp_res$genes, feature_annotation[["column"]]]
+            tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation[["column"]]]
         }
     
         if(dim(dea_results)[1]==0){
@@ -166,7 +177,7 @@ for(coefx in colnames(coef(lmfit))){
 }
 
 # rename "genes" column to "feature"
-colnames(dea_results)[colnames(dea_results)=="genes"] <- "feature"
+# colnames(dea_results)[colnames(dea_results)=="genes"] <- "feature"
 
 ### save DEA results
 write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)

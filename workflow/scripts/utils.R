@@ -59,3 +59,8 @@ custom_theme <- theme_bw(
                    family = font,            #axis famuly
                    size = size),                #font size
     )
+
+# add new lines in text of plots after 40 characters
+addline_format <- function(x,...){
+    return(gsub('(.{1,40})(\\_|\\s|\\.)', '\\1\n', x))
+}

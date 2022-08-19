@@ -2,6 +2,7 @@
 library(EnhancedVolcano, quietly=TRUE)
 library(patchwork, quietly=TRUE)
 library(ggplot2)
+library(ggtext)
 
 # source utility functions
 source("workflow/scripts/utils.R")
@@ -54,7 +55,7 @@ for (group in unique(dea_results$group)){
                     xlab = bquote(~log[2] ~ "fold change"),
                     ylab = bquote(~-log[10] ~ "adjusted p-value"),
                     axisLabSize = 12,
-                    title = paste0(group),
+                    title = addline_format(group),
                     subtitle = '', # default: bquote(italic(EnhancedVolcano))
                     caption = paste0("variables:",nrow(toptable),"; log2FC>",FCcutoff,"; adj.p-val<",pCutoff),
                     titleLabSize = 14,

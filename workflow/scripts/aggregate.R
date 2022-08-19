@@ -1,6 +1,7 @@
 #### load libraries & utility function 
 library(ggplot2)
 library(patchwork)
+library(ggtext)
 
 # source utility functions
 source("workflow/scripts/utils.R")
@@ -77,7 +78,7 @@ if("feature_name" %in% colnames(dea_results)){
     write.csv(lfc_df, file=file.path(dirname(file.path(dea_stats_path)),"DEA_FILTERED_LFC_annot.csv"), row.names=FALSE)
 }
 
-### save differential feature lists from filtered DEA results for downstream analysis                                             
+### save differential feature lists from filtered DEA results for downstream analysis (eg enrichment analysis)
 for (group in unique(dea_filtered_results$group)){
     for (direction in unique(dea_filtered_results$direction)){
         
@@ -105,9 +106,10 @@ dea_results_p <- ggplot(dea_filtered_results, aes(x=group, fill=direction)) +
                                              xlab("groups") +
                                              ylab("number of differential features") +
                                              scale_y_continuous(limits = c(0, NA), expand = c(0, 0)) +
+                                             scale_x_discrete(label=addline_format) +
                                              scale_fill_manual(values=list(up="red", down="blue"), drop=FALSE) +
                                              custom_theme +
-                                             theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1)) # rotates the x-Axis
+                                             theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1, size = 6)) # rotates the x-Axis
                                              
                                              
 # save plot
@@ -120,13 +122,13 @@ ggsave_new(filename = "DEA_stats",
            height=height)
                                              
                                              
-# plot P-value distribution as sanity check TODO: group in panels, save only one large plot, like volcanos, check BMDM DEA for alternative code
+# plot P-value distribution as sanity check
 pvalue_plots <- list()                                             
                                              
 for (group in unique(dea_results$group)){
     tmp_dea_results <- dea_results[dea_results$group==group, ]
 
-    pvalue_plots[[group]] <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + geom_histogram(bins=100) + theme_bw(16) + ggtitle(group) + custom_theme
+    pvalue_plots[[group]] <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + geom_histogram(bins=100) + theme_bw(16) + ggtitle(addline_format(group)) + custom_theme
 }
                                              
 width <- 4
@@ -140,8 +142,8 @@ height_panel <- height * ceiling(length(unique(dea_results$group))/n_col)
 pvalue_plots_panel <- wrap_plots(pvalue_plots, ncol = n_col, guides = "collect")
 
 # save plot
-options(repr.plot.width=width_panel, repr.plot.height=height_panel)
-print(pvalue_plots_panel)
+# options(repr.plot.width=width_panel, repr.plot.height=height_panel)
+# print(pvalue_plots_panel)
 
 ggsave_new(filename = "DEA_pvalue_distribution", 
            results_path=dirname(dea_stats_plot_path), 

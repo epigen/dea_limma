@@ -7,36 +7,39 @@ threads: 1
 partition: 'shortq'
 
 ##### GENERAL #####
+
+# absolute path to annotation file, specified in config/README.md
 annotation: /research/home/sreichl/projects/macroIC/config/CC001_dea_limma_annotation.csv
 
-# (optional): EXLAINATION HERE
+# (optional) absolute path to a feature annotation file with the first column as the used features (eg ENSEMBLE IDs) and "column" the annotated name (eg gene symbols). If not used leave empty "".
 feature_annotation:
     path: /nobackup/lab_bock/projects/macroIC/results/CC001/counts/gene_annotation.csv
     column: "external_gene_name"
 
+# absolute path to the result directory of the project/dataset
 result_path: /nobackup/lab_bock/projects/macroIC/results/CC001/
 
+# project/dataset name, used only in the report
 project_name: CC001
 
 
 ##### DEA #####
 
-# EXPLAINATION HERE
-# note: also for blocking variable (block_var)
+# specifiy the reference levels that the comparisons are based on of all variables of interest here (eg treatment: "untreated").
 reference_levels:
     treatment: "UT"
     time: "0h"
 
 ##### AGGREGATION #####
-# filters are applied to the DEA results and used for all outputs
+# filters are applied to the DEA results, which contain all results, and used for downstream outputs (eg feature lists, LFC matrix).
 filters:
     adj_pval: 0.05
-    lfc: 0.1
-    ave_expr: 0.1
+    lfc: 2
+    ave_expr: 0
 
 ##### VISUALIZATION #####
 
-# parameters for https://bioconductor.org/packages/release/bioc/html/EnhancedVolcano.html
+# parameters for volcano plots powered by EnhancedVolcano (https://bioconductor.org/packages/release/bioc/html/EnhancedVolcano.html)
 volcano:
     pCutoff: 0.05
     FCcutoff: 2
