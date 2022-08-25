@@ -1,7 +1,6 @@
 #### load libraries & utility function 
 library(ggplot2)
 library(patchwork)
-library(ggtext)
 
 # source utility functions
 source("workflow/scripts/utils.R")

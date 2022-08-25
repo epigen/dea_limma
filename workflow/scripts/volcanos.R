@@ -2,7 +2,6 @@
 library(EnhancedVolcano, quietly=TRUE)
 library(patchwork, quietly=TRUE)
 library(ggplot2)
-library(ggtext)
 
 # source utility functions
 source("workflow/scripts/utils.R")
