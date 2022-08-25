@@ -1,5 +1,5 @@
-# Differential Analysis & Visualization Snakemake Workflow using limma
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential (expression/accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [limma](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
+# Differential Analysis & Visualization Snakemake Workflow Using LIMMA
+A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [limma](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
 
 **If you use this workflow in a publication, don't forget to give credits to the authors by citing the URL of this (original) repository (and its DOI, see Zenodo badge above -> coming soon).**
 
@@ -38,41 +38,41 @@ This project wouldn't be possible without the following software and their depen
 # Methods
 This is a template for the Methods section of a scientific publication and is intended to serve as a starting point. Only retain paragraphs relevant to your analysis. References [ref] to the respective publications are curated in the software table above. Versions (ver) have to be read out from the respective conda environment specifications (.yaml file) or post execution. Parameters that have to be adapted depending on the data or workflow configurations are denoted in squared brackets e.g. [X].
 
-__Differential Expression Analysis (DEA).__ DEA was performed on the quality controlled filtered [raw/normalized] counts using the the limma (ver) [ref] workflow for fitting a linear model [formula] to identify features (genes/regions) that statistically significantly change with [comparisons] compared to the control group [reference levels] (intercept). Briefly, we determined normalization factors using edgeR::calcNormFactors (optional) using method [X], then applied voom (optional) to prepare data for linear modelling, blocked (optional) variable [X] to account for repeated measurements, lmFit to fit the model to the data, and finally eBayes (optional) with the robust (and trend flag – optional for normalized data) flag to compute moderated t-statistics. For all downstream analyses we extracted feature-wise, average expression, effect-sizes as log2 fold change and their adjusted statistical significance as p-values, determined using the Benjamini-Hochberg method, from each comparison using topTable. Next, the results were filtered for relevant features if they fulfilled the following criteria: statistical significance (adjusted p-value < [X]), absolute log2 fold change (> [X]), and average gene expression (> [X]). Finally, hierarchical clustering on the effect-sizes (log2 fold change) of the union of all relevant features and comparison groups was performed.
+__Differential Expression Analysis (DEA).__ DEA was performed on the quality-controlled filtered [raw/normalized] counts using the LIMMA (ver) [ref] workflow for fitting a linear model [formula] to identify features (genes/regions) that statistically significantly change with [comparisons] compared to the control group [reference levels] (intercept). Briefly, we determined normalization factors with edgeR::calcNormFactors (optional) using method [X], then applied voom (optional) to estimate the mean-variance relationship of the log-counts. We used blocking on (optional) variable [X] to account for repeated measurements, lmFit to fit the model to the data, and finally eBayes (optional) with the robust (and trend flag – optional for normalized data) flag to compute moderated t-statistics. For each comparison we extracted feature-wise average expression, effect sizes (log2 fold change) and their statistical significance as adjusted p-values, determined using the Benjamini-Hochberg method. Next, these results were filtered for relevant features based on the following criteria: statistical significance (adjusted p-value < [X]), absolute log2 fold change (> [X]), and average gene expression (> [X]). Finally, we performed hierarchical clustering on the effect sizes (log2 fold changes) of the union of all relevant features and comparison groups.
 
-__Visualization.__ The filtered result statistics, i.e., number of relevant features split by positive (up) and negative (down) effect-sizes, were visualized with stacked bar plots using ggplot (ver) [ref].
-To visually summarize results of the same analysis the filtered effect-size (log2 fold change) values of all features that were found to be relevant in at least one were visualized in a hierarchically clustered heatmap using pheatmap (ver) [ref]. 
-Volcano plots were generated for each comparison using EnhancedVolcano (ver) [ref] with adjusted p-value threshold of [pCutoff] and log2(fold change) threshold of [FCcutoff] as visual cut-offs for the y- and x-axis, respectively.
+__Visualization.__ The filtered result statistics, i.e., number of relevant features split by positive (up) and negative (down) effect sizes, were visualized with stacked bar plots using ggplot (ver) [ref].
+To visually summarize results of all performed comparisons, the filtered effect size (log2 fold change) values of all features that were found to be relevant in at least one comparison were plotted in a hierarchically clustered heatmap using pheatmap (ver) [ref]. 
+Volcano plots were generated for each comparison using EnhancedVolcano (ver) [ref] with adjusted p-value threshold of [pCutoff] and log2 fold change threshold of [FCcutoff] as visual cut-offs for the y- and x-axis, respectively.
 Finally, quality control plots of the fitted mean-variance relationship and raw p-values of the features were generated.
 
 
 **The analysis and visualizations described here were performed using a publicly available Snakemake [ver] (ref) workflow [ref - cite this workflow here].**
 
 # Features
-The workflow perfroms the following steps that produce the outlined results:
+The workflow performs the following steps that produce the outlined results:
 
 - Differential Expression Analysis (DEA) steps:
   - (optional) calculation of normalization factors using __edgeR::calcNormFactors__.
-  - (optional) calculation of "precision" weights to model the mean-variance relationship and to make linear models "applicable" to count data (weighted least squares) using __voom__.
+  - (optional) calculation of precision weights to model the mean-variance relationship in order to make linear models "applicable" to count data (weighted least squares) using __voom__.
   - (optional) __block__ on a "group" factor in case you have repeated measurements (generalized least squares).
-      - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie __~ timepoint + age + donor__ is overdetermined hence the formula becomes __~ timepoint + age__ and you "block" on __donor__.
-  - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit_.
+      - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
+  - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit__.
   - (optional) estimate variance "better" using __eBayes__, with the robustness flag (robust=TRUE), by looking across all genes (i.e. shrunk towards a common value) and compute moderated t-statistics.
       - (optional) eBayes with limma-trend (trend=TRUE)
-  - extract all statistics for variables of interest (=configured comparisons) using __topTable__ (eg coefficients/effect-size, statistical significance,...).
+  - extract all statistics for variables of interest (=configured comparisons) using __topTable__ (eg coefficients/effect size, statistical significance,...).
   - save a feature list per comparison group and direction of change (up/down) for downstream analyses (eg enrichment analysis) (TXT).
     - (optional) annotated feature list with suffix "_annot" (TXT).
-- DEA result statistics: total number of statistically significant results and split by positive (up) and negative (down) change (CSV).
+- DEA result statistics: total number of statistically significant features and split by positive (up) and negative (down) change (CSV).
 - DEA result filtering of features (eg genes) by 
   - statistical significance (<= adjusted p-value: adj_pval)
-  - effect-size (>= absolute log 2 fold change: lfc)
+  - effect size (>= absolute log 2 fold change: lfc)
   - average expression (>= ave_expr) in the data
 - Log Fold Change (LFC) matrix of filtered features by comparison groups (CSV).
   - (optional) annotated LFC matrix with suffix "_annot" (CSV)
 - Visualizations
   - filtered DEA result statistics ie number of features and direction (stacked bar plots)
-  - Volanco plot per comparison with configured cutoffs for statistical significance (pCutoff) and effect-size (FCcutoff)
-  - Clustered Heatmap of the LFC matrix
+  - volanco plot per comparison with configured cut-offs for statistical significance (pCutoff) and effect size (FCcutoff)
+  - clustered heatmap of the LFC matrix
   - quality control plots
       - (optional) voom mean-variance trend
       - (optional) intermediate mean-variance trend, in case of blocking and vooming
@@ -80,13 +80,13 @@ The workflow perfroms the following steps that produce the outlined results:
       - raw p-value distributions (to check for p-value inflation in relation to average expression)
 
 FYI
-- colons (":") in variable/group names (eg interactions) are replaced with double-underscores ("\_\_") downstream
+- Colons (":") in variable/group names (eg interactions) are replaced with double-underscores ("\_\_") downstream.
 - As of now we do not feature more complex contrast scenarios than are supported via topTable.
 
 
 # Usage
 Here are some tips for the usage of this workflow:
-- perform your first run with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
+- Perform your first run with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
 
 # Configuration
 Detailed specifications can be found here [./config/README.md](./config/README.md)
