@@ -29,7 +29,7 @@ if (!dir.exists(result_dir)){
     }
 
 ### load data
-data <- read.csv(file=data_path, row.names=1,)
+data <- read.csv(file=data_path, row.names=1)
 stopifnot(isNumeric(data))
 print("data")
 print(dim(data))
@@ -41,7 +41,7 @@ print(dim(metadata))
 
 ### load feature annotation file (optional)
 if (feature_annotation[["path"]]!=""){
-    feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1,)
+    feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1)
     print("feature_annot")
     print(dim(feature_annot))
 }
@@ -158,7 +158,7 @@ for(coefx in colnames(coef(lmfit))){
     if(any(unlist(lapply(comparisons, function(x) grepl(x, coefx))))){
         print(coefx)
         
-        tmp_res <- topTable(lmfit, coef=coefx, number=nrow(data))
+        tmp_res <- topTable(lmfit, coef=coefx, number=nrow(data), sort.by="P")
         tmp_res$feature <- rownames(tmp_res)
         tmp_res <- tmp_res[,c(ncol(tmp_res),1:(ncol(tmp_res)-1))]
         rownames(tmp_res) <- NULL
