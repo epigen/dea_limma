@@ -15,7 +15,7 @@ feature_annotation <- snakemake@params[["feature_annotation"]] #list(path="/noba
 reference_levels <- snakemake@params[["reference_levels"]] #list(treatment="UT", time="0h")
 design <- formula(snakemake@params[["formula"]]) #formula("~ treatment")
 block_var <- snakemake@params[["block_var"]] #0
-comparisons <- strsplit(snakemake@params[["comparisons"]], "|", fixed=T) #strsplit("treatment", "|", fixed=T)
+comparisons <- strsplit(snakemake@params[["comparisons"]], "|", fixed=T)[[1]] #strsplit("treatment", "|", fixed=T)
 calcNormFactors_method <- snakemake@params[["calcNormFactors_method"]] #"none"
 voom_flag <- snakemake@params[["voom"]] #1
 eBayes_flag <- snakemake@params[["eBayes"]] #1
