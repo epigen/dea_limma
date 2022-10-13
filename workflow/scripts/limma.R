@@ -36,6 +36,7 @@ print(dim(data))
 
 ### load metadata
 metadata <- read.csv(file=metadata_path, row.names=1, na.strings=c("NA",""))
+rownames(metadata) <- make.names(rownames(metadata))
 print("metadata")
 print(dim(metadata))
 
