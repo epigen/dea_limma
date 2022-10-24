@@ -9,7 +9,7 @@ rule env_export:
     conda:
         "../envs/{env}.yaml"
     resources:
-        mem_mb==1000, #config.get("mem", "16000"),
+        mem_mb=1000, #config.get("mem", "16000"),
     threads: config.get("threads", 1)
     log:
         os.path.join("logs","rules","env_{env}.log"),

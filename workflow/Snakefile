@@ -45,7 +45,7 @@ rule all:
                               ),
         envs = expand(os.path.join(config["result_path"],'envs','dea_limma','{env}.yaml'),env=['limma','volcanos','ggplot','heatmap']),
         configs = os.path.join(config["result_path"],'configs','dea_limma','{}_config.yaml'.format(config["project_name"])),
-        annotations = os.path.join(config["result_path"],'configs','dea_limma','{}_annot.csv'.format(config["project_name"])),,
+        annotations = os.path.join(config["result_path"],'configs','dea_limma','{}_annot.csv'.format(config["project_name"])),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
