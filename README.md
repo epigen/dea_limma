@@ -101,6 +101,8 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 - [Snakemake Workflow Catalog Entry](https://snakemake.github.io/snakemake-workflow-catalog?usage=epigen/dea_limma)
 
 # Resources
+- [Bioconductor - limma](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page userguides
+- [R Manual on Model Formulae](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html)
 - [Bioconductor - RNAseq123 - Workflow](https://bioconductor.org/packages/release/workflows/html/RNAseq123.html)
 - limma workflow tutorial RNA-seq analysis is easy as 1-2-3 with limma, Glimma and edgeR
     - [notebook](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/limmaWorkflow.html)
