@@ -50,7 +50,7 @@ if (feature_annotation[["path"]]!=""){
 ### prepare DEA
 
 # subset metadata with used columns and non-NA rows
-metadata_cols <- labels(terms(design))
+metadata_cols <- labels(terms(design)) #alternative all.vars(design)
 metadata_cols <- unique(unlist(lapply(metadata_cols, function(x) strsplit(x, ":", fixed = TRUE))))
 
 if (block_var!=0){
