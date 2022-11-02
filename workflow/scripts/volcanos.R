@@ -8,10 +8,10 @@ library(ggplot2)
 snakemake@source("./utils.R")
 
 # inputs
-dea_result_path <- snakemake@input[["dea_results"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_results.csv" 
+dea_result_path <- snakemake@input[["dea_results"]]
 
 # outputs
-volcano_plot_path <- snakemake@output[["dea_volcanos"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/plots/DEA_volcanos.png"
+volcano_plot_path <- snakemake@output[["dea_volcanos"]]
 
 # parameters
 pCutoff <- snakemake@params[["pCutoff"]] # 0.05
@@ -24,6 +24,9 @@ height <- 5
 
 ### load DEA results
 dea_results <- read.csv(file=file.path(dea_result_path))
+
+# replace adjusted p-value of 0 with min(adj.P.Val>0) * 10ˆ-1 for plotting
+dea_results[dea_results$adj.P.Val==0,"adj.P.Val"] <- min(dea_results$adj.P.Val[dea_results$adj.P.Val>0])*10^-1
 
 n_col <- min(10, length(unique(dea_results$group)))
 width_panel <- n_col * width + 1

@@ -9,10 +9,10 @@ library(ggplotify)
 snakemake@source("./utils.R")
 
 # inputs
-dea_filtered_lfc_path <- snakemake@input[["dea_filtered_lfc"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_FILTERED_LFC.csv"
+dea_filtered_lfc_path <- snakemake@input[["dea_filtered_lfc"]]
 
 # outputs
-dea_lfc_heatmap_path <- snakemake@output[["dea_lfc_heatmap"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/plots/DEA_LFC_heatmap.png"
+dea_lfc_heatmap_path <- snakemake@output[["dea_lfc_heatmap"]]
 
 # parameters
 
@@ -38,7 +38,8 @@ rownames(annot) <- colnames(dea_lfc)
 colnames(dea_lfc) <- sapply(colnames(dea_lfc), addline_format)
 
 # make heatmap
-lfc_heatmap <- as.ggplot(pheatmap(dea_lfc, 
+lfc_heatmap <- as.ggplot(pheatmap(dea_lfc,
+               cluster_cols = if (ncol(dea_lfc)>1) TRUE else FALSE, 
                show_rownames=F, 
                show_colnames=T,
                fontsize = 5,

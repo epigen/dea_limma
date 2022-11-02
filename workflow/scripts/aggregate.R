@@ -7,12 +7,12 @@ library(patchwork)
 snakemake@source("./utils.R")
 
 # inputs
-dea_result_path <- snakemake@input[["dea_results"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_results.csv" 
+dea_result_path <- snakemake@input[["dea_results"]]
 
 # outputs
-dea_stats_path <- snakemake@output[["dea_stats"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_stats.csv"
-dea_filtered_lfc_path <- snakemake@output[["dea_filtered_lfc"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_FILTERED_LFC.csv"
-dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/plots/DEA_stats.png"
+dea_stats_path <- snakemake@output[["dea_stats"]]
+dea_filtered_lfc_path <- snakemake@output[["dea_filtered_lfc"]]
+dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]]
 
 
 # parameters
@@ -99,7 +99,7 @@ if("feature_name" %in% colnames(dea_results)){
 }                                             
                                              
 ### visualize & save DEA statistics
-width_panel <- length(groups) * width + 1
+width_panel <- length(groups) * width + 1.5
                                              
 dea_results_p <- ggplot(dea_filtered_results, aes(x=group, fill=direction)) + 
                                              geom_bar() + 

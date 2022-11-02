@@ -4,14 +4,14 @@ library(edgeR)
 library(statmod)
 
 # inputs
-data_path <- snakemake@input[[1]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/counts/thp1_filtered.csv"
-metadata_path <- snakemake@input[[2]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/counts/thp1_annotation.csv"
+data_path <- snakemake@input[[1]]
+metadata_path <- snakemake@input[[2]]
 
 # outputs
-dea_result_path <- snakemake@output[["dea_results"]] #"/nobackup/lab_bock/projects/macroIC/results/CC001/dea_limma/CC001_thp1_filtered/DEA_results.csv" 
+dea_result_path <- snakemake@output[["dea_results"]]
 
 # parameters
-feature_annotation <- snakemake@params[["feature_annotation"]] #list(path="/nobackup/lab_bock/projects/macroIC/results/CC001/counts/gene_annotation.csv", column="external_gene_name")
+feature_annotation <- snakemake@params[["feature_annotation"]]
 reference_levels <- snakemake@params[["reference_levels"]] #list(treatment="UT", time="0h")
 design <- formula(snakemake@params[["formula"]]) #formula("~ treatment")
 block_var <- snakemake@params[["block_var"]] #0
@@ -50,7 +50,7 @@ if (feature_annotation[["path"]]!=""){
 ### prepare DEA
 
 # subset metadata with used columns and non-NA rows
-metadata_cols <- labels(terms(design)) #alternative all.vars(design)
+metadata_cols <- labels(terms(design)) #alternative: all.vars(design)
 metadata_cols <- unique(unlist(lapply(metadata_cols, function(x) strsplit(x, ":", fixed = TRUE))))
 
 if (block_var!=0){
@@ -69,6 +69,9 @@ samples <- intersect(colnames(data), rownames(metadata))
 data <- data[, samples]
 metadata <- metadata[samples,,drop=FALSE]
 stopifnot(all(colnames(data)==rownames(metadata)))
+                                      
+print("number of samples")
+print(length(samples))
 
 # relevel all categorical variables using the provided reference levels
 for(col in names(reference_levels)){
