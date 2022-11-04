@@ -5,7 +5,7 @@ library(ggplot2)
 
 # source utility functions
 # source("workflow/scripts/utils.R")
-snakemake@source("./utils.R")
+snakemake@source("utils.R")
 
 # inputs
 dea_result_path <- snakemake@input[["dea_results"]]
