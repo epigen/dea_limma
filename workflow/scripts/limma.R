@@ -182,6 +182,9 @@ for(coefx in colnames(coef(lmfit))){
 
 # rename "genes" column to "feature"
 # colnames(dea_results)[colnames(dea_results)=="genes"] <- "feature"
+                         
+# remove rows with adj.P.Val=NA
+dea_results <- dea_results[!is.na(dea_results$adj.P.Val),]
 
 ### save DEA results
 write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)
