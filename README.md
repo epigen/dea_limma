@@ -112,8 +112,11 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
     - [paper](https://f1000research.com/articles/9-1444/v1)
 - voom: precision weights unlock linear model analysis tools for RNA-seq read counts
     - [paper](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
-- scRNA-seq DEA benchmark paper featuring limma and limma-trend as valid methods
-    - [Bias, robustness and scalability in single-cell differential expression analysis](https://www.nature.com/articles/nmeth.4612)
+- scRNA-seq DEA benchmark paper featuring limma-voom and limma-trend as valid/best methods
+    - [paper: Bias, robustness and scalability in single-cell differential expression analysis](https://www.nature.com/articles/nmeth.4612)
+    - [code](https://github.com/csoneson/conquer_comparison)
+- scRNA-seq DEA benchmark featuring limma-voom and limma-trend emphasizing pseudo-bulking
+    - [paper: Confronting false discoveries in single-cell differential expression](https://www.nature.com/articles/s41467-021-25960-2)
 - alternative/complementary DEA method: Linear Mixed Models (LMM)
     - [variancePartition](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-1323-z)
     - [dream](https://academic.oup.com/bioinformatics/article/37/2/192/5878955)
