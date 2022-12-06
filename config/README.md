@@ -12,6 +12,6 @@ You need one configuration file and one annotation file to run the complete work
     -  comparisons: Variable names contained in the formula (and metadata) which coefficient's you are interested in, separated by '|' (eg treatment|batch). Results of all derived groups (eg treatmentLP) containing one of the comparisons will be returned.
     -  calcNormFactors_method: Flag to indicate if [edgeR:calcNormFactors](https://www.rdocumentation.org/packages/edgeR/versions/3.14.0/topics/calcNormFactors) function be used specifing the parameter "method" (eg none or TMM) or should be skipped (0).
     -  voom: Flag to indicate if voom function should be used (1) or not (0).
-    -  eBayes: Flag to indicate if eBayes function should be used (1) or not (0).
+    -  eBayes: Flag to indicate if eBayes function should be used (1) or not (0). Note: Skipping eBayes (0) will lead to the use of ordinary t-statistic with topTable and is [not recommended by the limma author Gordon Smyth](https://support.bioconductor.org/p/35174/), the B-statistics (log-odds) are still determined using eBayes, assuming they will not be used downstream. Make sure you know what you are doing.
     -  limma_trend: Flag to indicate if limma-trend should be used (1) (ie sets [limma::eBayes](https://www.rdocumentation.org/packages/limma/versions/3.28.14/topics/ebayes) parameter trend=TRUE), or not (0). Please make sure to activate the required eBayes function (=1) and deactivate voom (=0) if you use limma-trend. Using voom and limma-trend makes no sense, but is not forbiden by the workflow.
 

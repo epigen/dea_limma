@@ -153,6 +153,16 @@ if (eBayes_flag!=0){
     }else{
         lmfit <- eBayes(lmfit, robust=TRUE, trend=TRUE)
     }
+}else{ # Warning: not recommended by limma author Gordon Smyth (https://support.bioconductor.org/p/35174/)
+    # determine ordinary t statistic, p-value and B-statistic (lods) according to
+    # limma userguide chapter 13.2 Fitted Model Objects: http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf
+    # bioconductor forum: https://support.bioconductor.org/p/113833/
+    # bioconductor forum: https://support.bioconductor.org/p/35159/
+    # note: B-statistic determined using eBayes, assuming it will not be used downstream
+    
+    lmfit$t <- lmfit$coef/lmfit$stdev.unscaled/lmfit$sigma
+    lmfit$p.value <- 2 * pt(-abs(lmfit$t), df = lmfit$df.residual)
+    lmfit$lods <- eBayes(lmfit, robust=TRUE, trend=FALSE)$lods
 }
 
 # topTable to extract coefficients
@@ -179,13 +189,9 @@ for(coefx in colnames(coef(lmfit))){
         }
     }
 }
-
-# rename "genes" column to "feature"
-# colnames(dea_results)[colnames(dea_results)=="genes"] <- "feature"
                          
 # remove rows with adj.P.Val=NA
 dea_results <- dea_results[!is.na(dea_results$adj.P.Val),]
 
 ### save DEA results
 write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)
-
