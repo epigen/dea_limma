@@ -82,16 +82,7 @@ for(col in names(reference_levels)){
     }
 }
 
-
-# calculate Normalization Factors (optional)
-if (calcNormFactors_method!=0){
-    # create dge object
-    dge <- DGEList(data, samples=metadata, genes=rownames(data))
-    dge <- calcNormFactors(dge, method=calcNormFactors_method)
-}else{
-    dge <- data
-}
-
+## MODEL
 # create model matrix
 model_matrix <- model.matrix(design, metadata)
 # save model matrix
@@ -99,15 +90,26 @@ write.csv(model_matrix, file=file.path(result_dir,"model_matrix.csv"))
 
 # check if the model is not over-determined using SVD TODO: provide source or explanation
 stopifnot(all(round(svd(model_matrix)$d, 6) != 0))
-
-# voom (optional)
-if (voom_flag!=0){
-    pdf(file=file.path(result_dir,"mean_var_trend_voom.pdf"))
-    v <- voom(dge, model_matrix, plot=TRUE)
-    x <- dev.off()
-}else{
-    v <- dge
+       
+## PREPARE OBJECTS
+# calculate Normalization Factors (optional)
+if (calcNormFactors_method!=0){
+    # create dge object
+    dge <- DGEList(data, samples=metadata, genes=rownames(data))
+    dge <- calcNormFactors(dge, method=calcNormFactors_method)
+    
+    # voom (optional)
+    if (voom_flag!=0){
+        pdf(file=file.path(result_dir,"mean_var_trend_voom.pdf"))
+        v <- voom(dge, model_matrix, plot=TRUE)
+        x <- dev.off()
+    }else{
+        v <- edgeR::cpm(dge, log = TRUE, prior.count = 3)
+    }
+}else{ # ie if calcNormFactors_method==0 -> data is already log-normalized
+     v <- data
 }
+
 
 ### perform DEA
 
