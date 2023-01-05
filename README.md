@@ -87,6 +87,7 @@ FYI
 
 # Usage
 Here are some tips for the usage of this workflow:
+- Limma usage and best practices are not explained. For deatiled documentation, tutorials and insctructions see [Resources](#resources). To understand the implementation at hand see [limma.R](./workflow/scripts/limma.R).
 - Perform your first run(s) with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
 - Test minimal complex configurations on a subset of your data.
 - Start with simple models and try to understand the results.
