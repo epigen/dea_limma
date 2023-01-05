@@ -50,6 +50,7 @@ rule aggregate:
         os.path.join("logs","rules","aggregate_{analysis}.log"),
     params:
         partition=config.get("partition"),
+        score_formula = config["score_formula"],
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
         ave_expr = config["filters"]["ave_expr"],

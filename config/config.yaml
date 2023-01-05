@@ -31,6 +31,14 @@ reference_levels:
     time: "0h"
 
 ##### AGGREGATION #####
+# score_formula is used to calculate a score for each gene and comparison (group) that can be used downstream e.g., for ranked GSEA
+# eval based score calculation -> eval(parse(text=" "))
+# DEA result dataframe is called: dea_results
+# available numerical columns: logFC; AveExpr; t; P.Value; adj.P.Val; B
+# common/popular example: "-log10(dea_results$P.Value)*sign(dea_results$logFC)"
+# if not used leave empty: ""
+score_formula: "-log10(dea_results$P.Value)*sign(dea_results$logFC)"
+
 # filters are applied to the DEA results, which contain all results, and used for downstream outputs (eg feature lists, LFC matrix).
 filters:
     adj_pval: 0.05

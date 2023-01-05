@@ -19,6 +19,7 @@ dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]]
 adj_pval <- snakemake@params[["adj_pval"]] # 0.05
 lfc <- snakemake@params[["lfc"]] # 0
 ave_expr <- snakemake@params[["ave_expr"]] # 0
+score_formula <- snakemake@params[["score_formula"]] # "-log10(dea_results$P.Value)*sign(dea_results$logFC)"
 
 # plot specifications
 width <- 0.5
@@ -32,7 +33,7 @@ if (!dir.exists(results_path)){
 
 ### load DEA results
 dea_results <- read.csv(file=file.path(dea_result_path))
-
+groups <- unique(dea_results$group)
 
 ### save list of all expressed features for downstream analysis (eg as background in enrichment analyses)
 all_features <- unique(dea_results$feature)
@@ -42,6 +43,22 @@ if("feature_name" %in% colnames(dea_results)){
     all_features_annot <- unique(dea_results$feature_name)
     all_features_annot <- all_features_annot[all_features_annot != ""]
     write(all_features_annot, file.path(results_path, "ALL_features_annot.txt"))
+}
+
+# determine and save feature scores for each gene and group for downstream analysis e.g., ranked GSEA
+if (score_formula!=""){
+    dea_results$score <- eval(parse(text=score_formula))
+    
+    for (group in groups){
+        tmp_features <- dea_results[(dea_results$group==group),c("feature","score")]
+        write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores.csv")), row.names=FALSE)
+
+        if("feature_name" %in% colnames(dea_results)){
+            tmp_features <- dea_results[(dea_results$group==group),c("feature_name","score")]
+            tmp_features <- tmp_features[tmp_features$feature_name != "",]
+            write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores_annot.csv")), row.names=FALSE)
+        }
+    }
 }
 
 # annotate differential direction (up or down)
@@ -59,12 +76,11 @@ dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
 write.csv(dea_filtered_stats_df, file=file.path(dea_stats_path), row.names=TRUE)
 
 ### aggregate & save LFC matrix from filtered DEA result features
-groups <- unique(dea_results$group)
 features <- unique(dea_filtered_results$feature)
                                              
 lfc_df <- data.frame(matrix(nrow=length(features), ncol=length(groups), dimnames=list(features, groups)))
 
-for (group in unique(dea_results$group)){
+for (group in groups){
     tmp_dea_results <- dea_results[dea_results$group==group, ]
     rownames(tmp_dea_results) <- tmp_dea_results$feature
     lfc_df[features, group] <- tmp_dea_results[features, 'logFC']
