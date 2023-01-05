@@ -57,6 +57,7 @@ The workflow performs the following steps that produce the outlined results:
   - (optional) __block__ on a "group" factor in case you have repeated measurements (generalized least squares).
       - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
   - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit__.
+      - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts.
   - (optional) estimate variance "better" using __eBayes__, with the robustness flag (robust=TRUE), by looking across all genes (i.e. shrunk towards a common value) and compute moderated t-statistics.
       - (optional) eBayes with __limma-trend__ (trend=TRUE)
   - extract all statistics for variables of interest (=configured comparisons) using __topTable__ (eg coefficients/effect size, statistical significance,...).
@@ -81,7 +82,7 @@ The workflow performs the following steps that produce the outlined results:
 
 FYI
 - Colons (":") in variable/group names (eg interactions) are replaced with double-underscores ("\_\_") downstream.
-- As of now we do not feature more complex contrast scenarios than are supported via topTable.
+- As of now we do not feature more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses.
 
 
 # Usage

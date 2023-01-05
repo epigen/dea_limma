@@ -5,6 +5,7 @@ rule dea:
         get_paths
     output:
         dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
+        lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)

@@ -9,6 +9,7 @@ metadata_path <- snakemake@input[[2]]
 
 # outputs
 dea_result_path <- snakemake@output[["dea_results"]]
+lmfit_object_path <- snakemake@output[["lmfit_object"]]
 
 # parameters
 feature_annotation <- snakemake@params[["feature_annotation"]]
@@ -142,6 +143,9 @@ if(block_var!=0){
 } else {
     lmfit <- lmFit(v, model_matrix)
 }
+                                      
+# save fitted model object for manual downstream analyses e.g., contrasts
+saveRDS(lmfit, file = file.path(lmfit_object_path))
 
 # plot mean-variance trend of fitted model
 pdf(file=file.path(result_dir,"mean_var_trend_fitted.pdf"))
