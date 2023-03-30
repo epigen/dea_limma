@@ -38,7 +38,8 @@ rownames(annot) <- colnames(dea_lfc)
 colnames(dea_lfc) <- sapply(colnames(dea_lfc), addline_format)
 
 # make heatmap
-lfc_heatmap <- as.ggplot(pheatmap(dea_lfc,
+if(nrow(dea_lfc)<50000){
+    lfc_heatmap <- as.ggplot(pheatmap(dea_lfc,
                cluster_cols = if (ncol(dea_lfc)>1) TRUE else FALSE, 
                show_rownames=F, 
                show_colnames=T,
@@ -52,7 +53,9 @@ lfc_heatmap <- as.ggplot(pheatmap(dea_lfc,
                                      annotation_names_col = F,
                                   silent = TRUE
               ))
-
+}else{
+    lfc_heatmap <- ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Too many features to cluster and visualize.") + theme_void()
+}
 
 # save plot
 # options(repr.plot.width=width_panel, repr.plot.height=height)
