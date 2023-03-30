@@ -4,7 +4,7 @@ rule volcanos:
     input:
         dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
     output:
-        dea_volcanos = report(os.path.join(result_path,'{analysis}','plots','DEA_volcanos.png'),
+        dea_volcanos = report(expand(os.path.join(result_path,'{{analysis}}','plots','DEA_volcanos_{pval_type}.png'),pval_type=['adjp','rawp']),
                               caption="../report/volcano.rst",
                               category="{}_dea_limma".format(config["project_name"]),
                               subcategory="{analysis}"),

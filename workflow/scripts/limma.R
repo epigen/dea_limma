@@ -13,6 +13,9 @@ lmfit_object_path <- snakemake@output[["lmfit_object"]]
 
 # parameters
 feature_annotation <- snakemake@params[["feature_annotation"]]
+feature_annotation[["path"]] <- file.path(feature_annotation[["path"]]) # make path
+feature_annotation[["column"]] <- base::make.names(feature_annotation[["column"]])[1] # make R compatible column name
+
 reference_levels <- snakemake@params[["reference_levels"]] #list(treatment="UT", time="0h")
 design <- formula(snakemake@params[["formula"]]) #formula("~ treatment")
 block_var <- snakemake@params[["block_var"]] #0
@@ -89,8 +92,14 @@ model_matrix <- model.matrix(design, metadata)
 # save model matrix
 write.csv(model_matrix, file=file.path(result_dir,"model_matrix.csv"))
 
-# check if the model is not over-determined using SVD TODO: provide source or explanation
-stopifnot(all(round(svd(model_matrix)$d, 6) != 0))
+# check if the model represented by the design matrix has full rank ie linearly independent columns, which is required to make the model identifiable!
+# new: more efficient and computationally stable compared to the svd() function, especially for large matrices, and it does not require rounding the singular values or checking for non-zero values.
+if(qr(model_matrix)$rank != ncol(model_matrix)){
+    stop("Error: The design matrix representing your model does not have full rank, rendering the model not identifiable.")
+}
+# old: checks if all the singular values in the SVD decomposition of the model_matrix are non-zero, indicating that the matrix is full rank and invertible.
+# stopifnot(all(round(svd(model_matrix)$d, 6) != 0))
+
        
 ## PREPARE OBJECTS
 # calculate Normalization Factors (optional)

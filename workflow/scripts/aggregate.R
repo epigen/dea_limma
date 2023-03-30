@@ -45,7 +45,7 @@ if("feature_name" %in% colnames(dea_results)){
     write(all_features_annot, file.path(results_path, "ALL_features_annot.txt"))
 }
 
-# determine and save feature scores for each gene and group for downstream analysis e.g., ranked GSEA
+# determine and save feature scores for each gene and group for downstream analysis e.g., preranked GSEA
 if (score_formula!=""){
     dea_results$score <- eval(parse(text=score_formula))
     
