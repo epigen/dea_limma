@@ -27,6 +27,13 @@ analyses = list(annot.index)
 annot_dict = annot.to_dict('index')
 # print(annot_dict)
 
+# load feature list paths and keep only non-empty
+feature_lists = ['ALL']
+feature_lists_dict = config["feature_lists"]
+feature_lists_dict = {k: v for k, v in feature_lists_dict.items() if v!=""}
+if feature_lists_dict is not None:
+    feature_lists = feature_lists + list(feature_lists_dict.keys())
+
 result_path = os.path.join(config["result_path"],'dea_limma')
 
 rule all:
@@ -37,8 +44,8 @@ rule all:
         lmfit_objects = expand(os.path.join(result_path,'{analysis}','lmfit_object.rds'),
                             analysis = analyses,
                            ),
-        dea_volcanos = expand(os.path.join(result_path,'{analysis}','plots','DEA_volcanos_{pval_type}.png'),
-                            analysis = analyses, pval_type=['adjp','rawp']
+        dea_volcanos = expand(os.path.join(result_path,'{analysis}','plots','DEA_volcanos_{feature_list}_{pval_type}.png'),
+                            analysis = analyses, pval_type=['adjp','rawp'], feature_list = feature_lists,
                            ),
         dea_stats = expand(os.path.join(result_path,'{analysis}','DEA_stats.csv'),
                                analysis = analyses,

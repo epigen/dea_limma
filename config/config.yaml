@@ -51,3 +51,10 @@ filters:
 volcano:
     pCutoff: 0.05
     FCcutoff: 2
+
+# path(s) to feature lists as plain text files (.txt) with one gene per line.
+# if feature_annotation is provided then the provided feature names are expected, otherwise the features from the input data frame are used
+# used to plot highlight in volcano plots and generate LFC clustered heatmaps
+# only use camelCase for the feature_list names e.g., favoriteGenes: "path/to/favorite_genes.txt"
+feature_lists:
+    favoriteGenes: "path/to/favorite_genes.txt"

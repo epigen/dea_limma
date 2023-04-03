@@ -1,10 +1,10 @@
 
-# visualize DEA using volcano plots
+# visualize DEA results using volcano plots
 rule volcanos:
     input:
         dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
     output:
-        dea_volcanos = report(expand(os.path.join(result_path,'{{analysis}}','plots','DEA_volcanos_{pval_type}.png'),pval_type=['adjp','rawp']),
+        dea_volcanos = report(os.path.join(result_path,'{analysis}','plots','DEA_volcanos_{feature_list}_{pval_type}.png'),
                               caption="../report/volcano.rst",
                               category="{}_dea_limma".format(config["project_name"]),
                               subcategory="{analysis}"),
@@ -14,7 +14,7 @@ rule volcanos:
     conda:
         "../envs/volcanos.yaml"
     log:
-        os.path.join("logs","rules","volcanos_{analysis}.log"),
+        os.path.join("logs","rules","volcanos_{analysis}_{feature_list}_{pval_type}.log"),
     params:
         partition=config.get("partition"),
         pCutoff = config["volcano"]["pCutoff"],
