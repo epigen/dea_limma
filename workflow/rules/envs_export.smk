@@ -61,3 +61,24 @@ rule annot_export:
         cp {input} {output}
         """
 
+# export used gene lists for documentation and reproducibility
+rule feature_list_export:
+    input:
+        get_feature_list_path,
+    output:
+        feature_lists = report(os.path.join(config["result_path"],'configs','dea_limma','{feature_list}.txt'), 
+                            caption="../report/feature_lists.rst", 
+                            category="Configuration", 
+                            subcategory="{}_dea_limma".format(config["project_name"])
+                           ),
+    resources:
+        mem_mb=1000, #config.get("mem_small", "16000"),config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    log:
+        os.path.join("logs","rules","feature_list_export_{feature_list}.log"),
+    params:
+        partition=config.get("partition"),
+    shell:
+        """
+        cp {input} {output}
+        """

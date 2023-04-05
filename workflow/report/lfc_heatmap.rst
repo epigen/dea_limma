@@ -1,1 +1,1 @@
-Clustered heatmap visualizing log2 fold changes of the filtered DEA results of analysis {{snakemake.wildcards["analysis"]}}.
+Hierarchically clustered heatmap visualizing the effect sizes as log2 fold changes of {{snakemake.wildcards["feature_list"]}} features of analysis {{snakemake.wildcards["analysis"]}}.

@@ -25,9 +25,10 @@ rule volcanos:
 # visualize LFC of DEA results
 rule lfc_heatmap:
     input:
-        dea_filtered_lfc = os.path.join(result_path,'{analysis}','DEA_FILTERED_LFC.csv'),
+        dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
+#         dea_lfc = os.path.join(result_path,'{analysis}','DEA_LFC.csv'),
     output:
-        dea_lfc_heatmap = report(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap.png'),
+        dea_lfc_heatmap = report(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap_{feature_list}.png'),
                               caption="../report/lfc_heatmap.rst",
                               category="{}_dea_limma".format(config["project_name"]),
                               subcategory="{analysis}"),
@@ -37,8 +38,11 @@ rule lfc_heatmap:
     conda:
         "../envs/heatmap.yaml"
     log:
-        os.path.join("logs","rules","lfc_heatmap_{analysis}.log"),
+        os.path.join("logs","rules","lfc_heatmap_{analysis}_{feature_list}.log"),
     params:
         partition=config.get("partition"),
+        adj_pval = config["filters"]["adj_pval"],
+        lfc = config["filters"]["lfc"],
+        ave_expr = config["filters"]["ave_expr"],
     script:
         "../scripts/heatmap.R"

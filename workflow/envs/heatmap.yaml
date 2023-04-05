@@ -3,7 +3,9 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - r-ggplot2
-  - r-ggplotify
-  - r-patchwork
-  - r-pheatmap
+  - r-ggplot2=3.3.5
+  - r-ggplotify=0.1.0
+  - r-patchwork=1.1.1
+  - r-pheatmap=1.0.12
+  - r-reshape2=1.4.4
+  - r-stringi=1.7.3 

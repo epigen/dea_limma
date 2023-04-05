@@ -3,56 +3,112 @@ library(pheatmap)
 library(patchwork)
 library(ggplot2)
 library(ggplotify)
+library(reshape2)
 
 # source utility functions
 # source("workflow/scripts/utils.R")
 snakemake@source("./utils.R")
 
 # inputs
-dea_filtered_lfc_path <- snakemake@input[["dea_filtered_lfc"]]
+# dea_lfc_path <- snakemake@input[["dea_lfc"]]
+dea_result_path <- snakemake@input[["dea_results"]]
 
 # outputs
 dea_lfc_heatmap_path <- snakemake@output[["dea_lfc_heatmap"]]
 
 # parameters
-
+adj_pval <- as.numeric(snakemake@params[["adj_pval"]]) # 0.05
+lfc <- as.numeric(snakemake@params[["lfc"]]) # 0
+ave_expr <- as.numeric(snakemake@params[["ave_expr"]]) # 0
+feature_list_name <- snakemake@wildcards[["feature_list"]]
 
 # plot specifications
 width <- 0.25
-height <- 5
+height <- 0.15
 
 
-### load LFC DEA results
-dea_lfc <- read.csv(file=file.path(dea_filtered_lfc_path), row.names = 1)
+# ### load LFC DEA results
+# dea_lfc <- read.csv(file=file.path(dea_lfc_path), row.names = 1)
+
+### load DEA results
+dea_results <- read.csv(file=file.path(dea_result_path))
+
+# generate or load feature list
+if (feature_list_name=="FILTERED"){
+    feature_list <- unique(dea_results[(dea_results$adj.P.Val <= adj_pval) & 
+                                  (abs(dea_results$logFC) >= lfc) & 
+                                  (dea_results$AveExpr >= ave_expr),'feature'])
+}else{
+    feature_list_path <- snakemake@config[["feature_lists"]][[feature_list_name]]
+    feature_list <- scan(file.path(feature_list_path), character())
+    
+    # if feature annotation is used then map annotation to features
+    if("feature_name" %in% colnames(dea_results)){
+        feature_list <- unique(unlist(sapply(feature_list, function(x) dea_results[dea_results$feature_name==x, 'feature'])))
+    }
+}
+
+
+# make LFC dataframe
+lfc_df <- dcast(dea_results, feature ~ group, value.var = 'logFC')
+rownames(lfc_df) <- lfc_df$feature
+lfc_df$feature <- NULL
+
+# make adjusted p-value dataframe
+adjp_df <- dcast(dea_results, feature ~ group, value.var = 'adj.P.Val')
+rownames(adjp_df) <- adjp_df$feature
+adjp_df$feature <- NULL
+
+# subset dataframes according to feature list
+lfc_df <- lfc_df[feature_list, ]
+adjp_df <- adjp_df[feature_list, ]
 
 # set NA values to 0 (NA because below LFC threshold during testing or filtering)
-dea_lfc[is.na(dea_lfc)] <- 0
+lfc_df[is.na(lfc_df)] <- 0
+
+# indicate significance
+adjp_df[adjp_df<=adj_pval] <- "*"
+adjp_df[adjp_df>adj_pval] <- ""
 
 ### visualize LFC of DEA results as heatmap
-width_panel <- width * ncol(dea_lfc) + 3
-
-annot <- data.frame(group=colnames(dea_lfc))
-rownames(annot) <- colnames(dea_lfc)
+height_panel <-  if (nrow(lfc_df)<100) (height * nrow(lfc_df) + 2) else 5
+width_panel <- width * ncol(lfc_df) + 2
 
 # format colnames for plotting
-colnames(dea_lfc) <- sapply(colnames(dea_lfc), addline_format)
+# colnames(lfc_df) <- sapply(colnames(lfc_df), addline_format)
 
-# make heatmap
-if(nrow(dea_lfc)<50000){
-    lfc_heatmap <- as.ggplot(pheatmap(dea_lfc,
-               cluster_cols = if (ncol(dea_lfc)>1) TRUE else FALSE, 
-               show_rownames=F, 
-               show_colnames=T,
-               fontsize = 5,
-               angle_col = 45,
-               treeheight_row = 25,
-               treeheight_col = 10,
-#                annotation_col = annot,
-               breaks=seq(-max(abs(dea_lfc)), max(abs(dea_lfc)), length.out=200),
-               color=colorRampPalette(c("blue", "white", "red"))(200),
-                                     annotation_names_col = F,
-                                  silent = TRUE
-              ))
+# format rownames for plotting
+if("feature_name" %in% colnames(dea_results)){
+    labels_row <- dea_results[match(rownames(lfc_df), dea_results$feature), 'feature_name']
+
+}else{
+    labels_row <- rownames(lfc_df)
+}                                     
+
+
+# make heatmap only if less than 50000 features
+if(nrow(lfc_df)<50000){
+    lfc_heatmap <- as.ggplot(pheatmap(lfc_df,
+                                      display_numbers = if(nrow(lfc_df)<100) adjp_df else FALSE,
+                                      main=paste0("logFC of ", feature_list_name," features"),
+                                      cluster_cols = ifelse(ncol(lfc_df)>1, TRUE, FALSE),
+                                      cluster_rows = ifelse(nrow(lfc_df)>1, TRUE, FALSE),
+                                      show_rownames = ifelse(nrow(lfc_df)<100, TRUE, FALSE),
+                                      labels_row = labels_row,
+                                      show_colnames = TRUE,
+                                      fontsize = 5,
+                                      fontsize_number = 10,
+                                      angle_col = 45,
+                                      treeheight_row = 10,
+                                      treeheight_col = 10,
+                                      cellwidth = 10,
+                                      cellheight = ifelse(nrow(lfc_df)<100, 10, NA),
+                                      breaks=seq(-max(abs(lfc_df)), max(abs(lfc_df)), length.out=200),
+                                      color=colorRampPalette(c("blue", "white", "red"))(200),
+                                      annotation_names_col = F,
+                                      silent = TRUE
+                                     )
+                            )
 }else{
     lfc_heatmap <- ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Too many features to cluster and visualize.") + theme_void()
 }
@@ -61,8 +117,8 @@ if(nrow(dea_lfc)<50000){
 # options(repr.plot.width=width_panel, repr.plot.height=height)
 # print(lfc_heatmap)
 
-ggsave_new(filename = "DEA_LFC_heatmap", 
+ggsave_new(filename = paste0("DEA_LFC_heatmap_",feature_list_name), 
            results_path=dirname(dea_lfc_heatmap_path), 
            plot=lfc_heatmap, 
            width=width_panel, 
-           height=height)
+           height=height_panel)

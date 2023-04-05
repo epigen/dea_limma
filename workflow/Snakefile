@@ -28,7 +28,7 @@ annot_dict = annot.to_dict('index')
 # print(annot_dict)
 
 # load feature list paths and keep only non-empty
-feature_lists = ['ALL']
+feature_lists = []
 feature_lists_dict = config["feature_lists"]
 feature_lists_dict = {k: v for k, v in feature_lists_dict.items() if v!=""}
 if feature_lists_dict is not None:
@@ -45,17 +45,18 @@ rule all:
                             analysis = analyses,
                            ),
         dea_volcanos = expand(os.path.join(result_path,'{analysis}','plots','DEA_volcanos_{feature_list}_{pval_type}.png'),
-                            analysis = analyses, pval_type=['adjp','rawp'], feature_list = feature_lists,
+                            analysis = analyses, pval_type=['adjp','rawp'], feature_list = feature_lists + ['ALL'],
                            ),
         dea_stats = expand(os.path.join(result_path,'{analysis}','DEA_stats.csv'),
                                analysis = analyses,
                               ),
-        dea_lfc_heatmap = expand(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap.png'),
-                               analysis = analyses,
+        dea_lfc_heatmap = expand(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap_{feature_list}.png'),
+                               analysis = analyses, feature_list = feature_lists + ['FILTERED'],
                               ),
         envs = expand(os.path.join(config["result_path"],'envs','dea_limma','{env}.yaml'),env=['limma','volcanos','ggplot','heatmap']),
         configs = os.path.join(config["result_path"],'configs','dea_limma','{}_config.yaml'.format(config["project_name"])),
         annotations = os.path.join(config["result_path"],'configs','dea_limma','{}_annot.csv'.format(config["project_name"])),
+        feature_lists = expand(os.path.join(config["result_path"],'configs','dea_limma','{feature_list}.txt'), feature_list = feature_lists),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)

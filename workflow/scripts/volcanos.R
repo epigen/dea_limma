@@ -17,7 +17,6 @@ volcano_plot_path <- snakemake@output[["dea_volcanos"]]
 pCutoff <- snakemake@params[["pCutoff"]] # 0.05
 FCcutoff <- snakemake@params[["FCcutoff"]] # 2
 pval_type <- snakemake@wildcards[["pval_type"]] # 'adjp'
-
 feature_list_name <- snakemake@wildcards[["feature_list"]]
 
 # plot specifications
@@ -27,7 +26,7 @@ height <- 5
 ### load DEA results
 dea_results <- read.csv(file=file.path(dea_result_path))
 
-# load feature list of not ALL
+# load feature list if not ALL
 if (feature_list_name!="ALL"){
     feature_list_path <- snakemake@config[["feature_lists"]][[feature_list_name]]
     feature_list <- scan(file.path(feature_list_path), character())
