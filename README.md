@@ -72,8 +72,6 @@ The workflow performs the following steps that produce the outlined results:
   - statistical significance (<= adjusted p-value: adj_pval)
   - effect size (>= absolute log 2 fold change: lfc)
   - average expression (>= ave_expr) in the data (to skip this filter use `-Inf`)
-- Log Fold Change (LFC) matrix of filtered features by comparison groups (CSV).
-  - (optional) annotated LFC matrix with suffix "_annot" (CSV)
 - Visualizations
   - filtered DEA result statistics ie number of features and direction (stacked bar plots)
   - volanco plots per comparison with effect size on the x-axis and raw p-value(rawp)/adjusted p-value (adjp) on the y-axis
@@ -116,7 +114,7 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 
 # Resources
 - Recommended [MR.PARETO](https://github.com/epigen/mr.pareto) modules for downstream analyses:
-    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis)  for biodecial interpretation of results.
+    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis)  for biomedical interpretation of results.
     - [Genome Tracks](https://github.com/epigen/genome_tracks) for visualization of top hits.
 - [Bioconductor - limma](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page userguides
 - [R Manual on Model Formulae](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html)
