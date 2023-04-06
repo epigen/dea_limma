@@ -4,5 +4,5 @@ channels:
   - defaults
 dependencies:
   - bioconductor-limma=3.46.0
-  - bioconductor-edger
-  - r-statmod
+  - bioconductor-edger=3.32.1
+  - r-statmod=1.4.37

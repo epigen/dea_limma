@@ -11,6 +11,8 @@ min_version("6.0.3")
 SDIR = os.path.realpath(os.path.dirname(srcdir("Snakefile")))
 shell.prefix(f"set -eo pipefail;")
 
+module_name = "dea_limma"
+
 ##### container image #####
 # containerized: "docker://sreichl/..."
 
@@ -34,7 +36,7 @@ feature_lists_dict = {k: v for k, v in feature_lists_dict.items() if v!=""}
 if feature_lists_dict is not None:
     feature_lists = feature_lists + list(feature_lists_dict.keys())
 
-result_path = os.path.join(config["result_path"],'dea_limma')
+result_path = os.path.join(config["result_path"], module_name)
 
 rule all:
     input:

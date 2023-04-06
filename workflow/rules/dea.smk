@@ -36,13 +36,23 @@ rule aggregate:
         # filtered_features = os.path.join(result_path,'{analysis}','feature_lists','FILTERED_features.txt'),
         dea_stats = report(os.path.join(result_path,'{analysis}','DEA_stats.csv'), 
                                   caption="../report/dea_stats.rst", 
-                                  category="{}_dea_limma".format(config["project_name"]), 
-                                  subcategory="{analysis}"),
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "DEA statistics",
+                                      "type": "table",
+                                      "misc": "CSV",
+                                  }),
         # dea_lfc = os.path.join(result_path,'{analysis}','DEA_LFC.csv'),
         dea_stats_plot = report(os.path.join(result_path,'{analysis}','plots','DEA_stats.png'), 
                                   caption="../report/dea_stats.rst", 
-                                  category="{}_dea_limma".format(config["project_name"]), 
-                                  subcategory="{analysis}"),
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "DEA statistics",
+                                      "type": "stacked bar plot",
+                                      "misc": "PNG",
+                                  }),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)

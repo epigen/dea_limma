@@ -4,7 +4,7 @@ rule env_export:
         report(os.path.join(config["result_path"],'envs','dea_limma','{env}.yaml'),
                       caption="../report/software.rst", 
                       category="Software", 
-                      subcategory="{}_dea_limma".format(config["project_name"])
+                      subcategory="{}_{}".format(config["project_name"], module_name)
                      ),
     conda:
         "../envs/{env}.yaml"
@@ -26,7 +26,7 @@ rule config_export:
         configs = report(os.path.join(config["result_path"],'configs','dea_limma','{}_config.yaml'.format(config["project_name"])), 
                          caption="../report/configs.rst", 
                          category="Configuration", 
-                         subcategory="{}_dea_limma".format(config["project_name"])
+                         subcategory="{}_{}".format(config["project_name"], module_name)
                         )
     resources:
         mem_mb=config.get("mem", "16000"),
@@ -47,7 +47,7 @@ rule annot_export:
         annot = report(os.path.join(config["result_path"],'configs','dea_limma','{}_annot.csv'.format(config["project_name"])), 
                          caption="../report/configs.rst", 
                          category="Configuration", 
-                         subcategory="{}_dea_limma".format(config["project_name"])
+                         subcategory="{}_{}".format(config["project_name"], module_name)
                         )
     resources:
         mem_mb=1000, #config.get("mem_small", "16000"),
@@ -69,7 +69,7 @@ rule feature_list_export:
         feature_lists = report(os.path.join(config["result_path"],'configs','dea_limma','{feature_list}.txt'), 
                             caption="../report/feature_lists.rst", 
                             category="Configuration", 
-                            subcategory="{}_dea_limma".format(config["project_name"])
+                            subcategory="{}_{}".format(config["project_name"], module_name)
                            ),
     resources:
         mem_mb=1000, #config.get("mem_small", "16000"),config.get("mem", "16000"),

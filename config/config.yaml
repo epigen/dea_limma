@@ -56,8 +56,8 @@ volcano:
     FCcutoff: 2
 
 # path(s) to feature lists as plain text files (.txt) with one gene per line.
-# if feature_annotation is provided then the provided feature names are expected, otherwise the features from the input data frame are used
-# used to plot highlight in volcano plots and generate LFC clustered heatmaps
+# if feature_annotation is provided then the provided feature names are expected, otherwise the features from the input data frame are used.
+# used to highlight features in volcano plots and generate LFC clustered heatmaps
 # only use camelCase for the feature_list names like in the examples below.
 # if not used leave empty.
 feature_lists:

@@ -6,8 +6,13 @@ rule volcanos:
     output:
         dea_volcanos = report(os.path.join(result_path,'{analysis}','plots','DEA_volcanos_{feature_list}_{pval_type}.png'),
                               caption="../report/volcano.rst",
-                              category="{}_dea_limma".format(config["project_name"]),
-                              subcategory="{analysis}"),
+                              category="{}_{}".format(config["project_name"], module_name),
+                              subcategory="{analysis}",
+                              labels={
+                                  "name": "Volcano plot",
+                                  "type": "{pval_type}",
+                                  "misc": "{feature_list}",
+                              }),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
@@ -30,8 +35,13 @@ rule lfc_heatmap:
     output:
         dea_lfc_heatmap = report(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap_{feature_list}.png'),
                               caption="../report/lfc_heatmap.rst",
-                              category="{}_dea_limma".format(config["project_name"]),
-                              subcategory="{analysis}"),
+                              category="{}_{}".format(config["project_name"], module_name),
+                              subcategory="{analysis}",
+                              labels={
+                                  "name": "Heatmap",
+                                  "type": "effect sizes",
+                                  "misc": "{feature_list}",
+                              }),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)

@@ -1,6 +1,8 @@
 # Differential Analysis & Visualization Snakemake Workflow Using LIMMA
 A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [limma](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
 
+This workflow adheres to the module specifications of [MR.PARETO](https://github.com/epigen/mr.pareto), an effort to augment research by modularizing (biomedical) data science. For more details and modules check out the project's repository.
+
 **If you use this workflow in a publication, don't forget to give credits to the authors by citing the URL of this (original) repository (and its DOI, see Zenodo badge above -> coming soon).**
 
 ![Workflow Rulegraph](./workflow/dags/rulegraph.svg)
@@ -16,6 +18,7 @@ Table of contents
   * [Examples](#examples)
   * [Links](#links)
   * [Resources](#resources)
+  * [Publications](#publications)
 
 # Authors
 - [Stephan Reichl](https://github.com/sreichl)
@@ -38,13 +41,12 @@ This project wouldn't be possible without the following software and their depen
 # Methods
 This is a template for the Methods section of a scientific publication and is intended to serve as a starting point. Only retain paragraphs relevant to your analysis. References [ref] to the respective publications are curated in the software table above. Versions (ver) have to be read out from the respective conda environment specifications (.yaml file) or post execution. Parameters that have to be adapted depending on the data or workflow configurations are denoted in squared brackets e.g. [X].
 
-__Differential Expression Analysis (DEA).__ DEA was performed on the quality-controlled filtered [raw/normalized] counts using the LIMMA (ver) [ref] workflow for fitting a linear model [formula] to identify features (genes/regions) that statistically significantly change with [comparisons] compared to the control group [reference levels] (intercept). Briefly, we determined normalization factors with edgeR::calcNormFactors (optional) using method [X], then applied voom (optional) to estimate the mean-variance relationship of the log-counts. We used blocking on (optional) variable [X] to account for repeated measurements, lmFit to fit the model to the data, and finally eBayes (optional) with the robust (and trend flag – optional for normalized data) flag to compute (moderated/ordinary) t-statistics. For each comparison we used topTable to extract feature-wise average expression, effect sizes (log2 fold change) and their statistical significance as adjusted p-values, determined using the Benjamini-Hochberg method. Furthermore, we calculated feature scores, for each feature in all comparisons, using the formula [score_formula] for downstream ranked enrichment analyses. Next, these results were filtered for relevant features based on the following criteria: statistical significance (adjusted p-value < [X]), absolute log2 fold change (> [X]), and average gene expression (> [X]). Finally, we performed hierarchical clustering on the effect sizes (log2 fold changes) of the union of all relevant features and comparison groups.
+__Differential Expression Analysis (DEA).__ DEA was performed on the quality-controlled filtered [raw/normalized] counts using the LIMMA (ver) [ref] workflow for fitting a linear model [formula] to identify features (genes/regions) that statistically significantly change with [comparisons] compared to the control group [reference levels] (intercept). Briefly, we determined normalization factors with edgeR::calcNormFactors (optional) using method [X], then applied voom (optional) to estimate the mean-variance relationship of the log-counts. We used blocking on (optional) variable [X] to account for repeated measurements, lmFit to fit the model to the data, and finally eBayes (optional) with the robust (and trend flag – optional for normalized data) flag to compute (moderated/ordinary) t-statistics. For each comparison we used topTable to extract feature-wise average expression, effect sizes (log2 fold change) and their statistical significance as adjusted p-values, determined using the Benjamini-Hochberg method. Furthermore, we calculated feature scores, for each feature in all comparisons, using the formula [score_formula] for downstream ranked enrichment analyses. Next, these results were filtered for relevant features based on the following criteria: statistical significance (adjusted p-value < [X]), effect size (absolute log2 fold change > [X]), and expression (average expression > [X]). Finally, we performed hierarchical clustering on the effect sizes (log2 fold changes) of the union of all relevant features and comparison groups.
 
 __Visualization.__ The filtered result statistics, i.e., number of relevant features split by positive (up) and negative (down) effect sizes, were visualized with stacked bar plots using ggplot (ver) [ref].
-To visually summarize results of all performed comparisons, the filtered effect size (log2 fold change) values of all features that were found to be relevant in at least one comparison were plotted in a hierarchically clustered heatmap using pheatmap (ver) [ref]. 
+To visually summarize results of all performed comparisons, the effect size (log2 fold change) values of all relevant features in at least one comparison were plotted in a hierarchically clustered heatmap using pheatmap (ver) [ref]. 
 Volcano plots were generated for each comparison using EnhancedVolcano (ver) [ref] with adjusted p-value threshold of [pCutoff] and log2 fold change threshold of [FCcutoff] as visual cut-offs for the y- and x-axis, respectively.
 Finally, quality control plots of the fitted mean-variance relationship and raw p-values of the features were generated.
-
 
 **The analysis and visualizations described here were performed using a publicly available Snakemake (ver) [ref] workflow (ver) [ref - cite this workflow here].**
 
@@ -69,14 +71,20 @@ The workflow performs the following steps that produce the outlined results:
 - DEA result filtering of features (eg genes) by 
   - statistical significance (<= adjusted p-value: adj_pval)
   - effect size (>= absolute log 2 fold change: lfc)
-  - average expression (>= ave_expr) in the data
+  - average expression (>= ave_expr) in the data (to skip this filter use `-Inf`)
 - Log Fold Change (LFC) matrix of filtered features by comparison groups (CSV).
   - (optional) annotated LFC matrix with suffix "_annot" (CSV)
 - Visualizations
   - filtered DEA result statistics ie number of features and direction (stacked bar plots)
-  - volanco plot per comparison with configured cut-offs for statistical significance (pCutoff) and effect size (FCcutoff)
-  - clustered heatmap of the LFC matrix
-  - quality control plots
+  - volanco plots per comparison with effect size on the x-axis and raw p-value(rawp)/adjusted p-value (adjp) on the y-axis
+      - highlighting features according to configured cut-offs for statistical significance (pCutoff) and effect size (FCcutoff)
+      - (optional) highlighting features according to configured feature lists
+  - hierarchically clustered heatmap of effect sizes (LFC) per comparison (features x comparisons) indicating statistical significance with a star '\*'
+      - using all relevant features (FILTERED)
+      - (optional) using configured feature lists
+      - in case of more than 100 features the row labels and significance indicators (\*) are removed
+      - in case of more than 50000 features no heatmap is generated
+  - diagnostic quality control plots
       - (optional) voom mean-variance trend
       - (optional) intermediate mean-variance trend, in case of blocking and vooming
       - post-fitting mean-variance trend
@@ -107,6 +115,9 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 - [Snakemake Workflow Catalog Entry](https://snakemake.github.io/snakemake-workflow-catalog?usage=epigen/dea_limma)
 
 # Resources
+- Recommended [MR.PARETO](https://github.com/epigen/mr.pareto) modules for downstream analyses:
+    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis)  for biodecial interpretation of results.
+    - [Genome Tracks](https://github.com/epigen/genome_tracks) for visualization of top hits.
 - [Bioconductor - limma](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page userguides
 - [R Manual on Model Formulae](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html)
 - [Bioconductor - RNAseq123 - Workflow](https://bioconductor.org/packages/release/workflows/html/RNAseq123.html)
@@ -126,3 +137,7 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 - alternative/complementary DEA method: Linear Mixed Models (LMM)
     - [variancePartition](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-1323-z)
     - [dream](https://academic.oup.com/bioinformatics/article/37/2/192/5878955)
+
+# Publications
+The following publications successfully used this module for their analyses.
+- ...
