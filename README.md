@@ -1,9 +1,11 @@
 # Differential Analysis & Visualization Snakemake Workflow Using LIMMA
+[![DOI](https://zenodo.org/badge/524038188.svg)](https://zenodo.org/badge/latestdoi/524038188)
+
 A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [limma](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
 
 This workflow adheres to the module specifications of [MR.PARETO](https://github.com/epigen/mr.pareto), an effort to augment research by modularizing (biomedical) data science. For more details and modules check out the project's repository.
 
-**If you use this workflow in a publication, don't forget to give credits to the authors by citing the URL of this (original) repository (and its DOI, see Zenodo badge above -> coming soon).**
+**If you use this workflow in a publication, please don't forget to give credits to the authors by citing it using this DOI [10.5281/zenodo.7808516](https://doi.org/10.5281/zenodo.7808516).**
 
 ![Workflow Rulegraph](./workflow/dags/rulegraph.svg)
 
@@ -49,7 +51,7 @@ To visually summarize results of all performed comparisons, the effect size (log
 Volcano plots were generated for each comparison using EnhancedVolcano (ver) [ref] with adjusted p-value threshold of [pCutoff] and log2 fold change threshold of [FCcutoff] as visual cut-offs for the y- and x-axis, respectively.
 Finally, quality control plots of the fitted mean-variance relationship and raw p-values of the features were generated.
 
-**The analysis and visualizations described here were performed using a publicly available Snakemake (ver) [ref] workflow (ver) [ref - cite this workflow here].**
+**The analysis and visualizations described were performed using a publicly available Snakemake (ver) [ref] workflow (ver) [[10.5281/zenodo.7808516](https://doi.org/10.5281/zenodo.7808516)].**
 
 # Features
 The workflow performs the following steps that produce the outlined results:
