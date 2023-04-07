@@ -23,6 +23,7 @@ Table of contents
 # Authors
 - [Stephan Reichl](https://github.com/sreichl)
 - [Lukas Folkman](https://github.com/lukas-folkman)
+- [Christoph Bock](https://github.com/chrbock)
 
 
 # Software
