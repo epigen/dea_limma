@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: Differential Analysis & Visualization Workflow Using limma
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Stephan
+    family-names: Reichl
+    orcid: 'https://orcid.org/0000-0001-8555-7198'
+    affiliation: CeMM Research Center for Molecular Medicine
+  - given-names: Lukas
+    family-names: Folkman
+    orcid: 'https://orcid.org/0000-0002-5811-8875'
+    affiliation: CeMM Research Center for Molecular Medicine
+  - given-names: Christoph
+    family-names: Bock
+    orcid: 'https://orcid.org/0000-0001-6091-3088'
+    affiliation: CeMM Research Center for Molecular Medicine
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.7808516
+    description: >-
+      This DOI represents all versions, and will always
+      resolve to the latest one.
+repository-code: 'https://github.com/epigen/dea_limma'
+url: 'https://epigen.github.io/dea_limma/'
+abstract: >-
+  A Snakemake workflow for performing and visualizing
+  differential expression (or accessibility) analyses (DEA)
+  of NGS data (e.g., RNA-seq, ATAC-seq, scRNA-seq,...)
+  powered by the R package limma.
+keywords:
+  - Bioinformatics
+  - Workflow
+  - Differential Analysis
+  - Visualization
+  - Snakemake
+license: GPL-3.0
