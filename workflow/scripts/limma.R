@@ -114,6 +114,8 @@ if (calcNormFactors_method!=0){
         v <- voom(dge, model_matrix, plot=TRUE)
         x <- dev.off()
     }else{
+        # directly taken from "Differential expression: limma-trend" in the limma userguide
+        # http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf
         v <- edgeR::cpm(dge, log = TRUE, prior.count = 3)
     }
 }else{ # ie if calcNormFactors_method==0 -> data is already log-normalized
