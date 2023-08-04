@@ -44,7 +44,7 @@ if (feature_list_name=="FILTERED"){
     
     # if feature annotation is used then map annotation to features
     if("feature_name" %in% colnames(dea_results)){
-        feature_list <- unique(unlist(sapply(feature_list, function(x) dea_results[dea_results$feature_name==x, 'feature'])))
+        feature_list <- dea_results[match(feature_list, dea_results$feature_name), 'feature']
     }
 }
 
