@@ -24,7 +24,7 @@ ave_expr <- as.numeric(snakemake@params[["ave_expr"]]) # 0
 feature_list_name <- snakemake@wildcards[["feature_list"]]
 
 # plot specifications
-width <- 0.25
+width <- 0.15
 height <- 0.15
 
 ### load DEA results
@@ -78,6 +78,7 @@ lfc_df[is.na(lfc_df)] <- 0
 # indicate significance
 adjp_df[adjp_df<=adj_pval] <- "*"
 adjp_df[adjp_df>adj_pval] <- ""
+adjp_df[is.na(adjp_df)] <- ""
 
 ### visualize LFC of DEA results as heatmap
 height_panel <-  if (nrow(lfc_df)<100) (height * nrow(lfc_df) + 2) else 5
