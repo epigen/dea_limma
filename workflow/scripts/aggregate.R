@@ -15,6 +15,7 @@ dea_result_path <- snakemake@input[["dea_results"]]
 dea_stats_path <- snakemake@output[["dea_stats"]]
 all_features_path <- snakemake@output[["all_features"]]
 dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]]
+dea_pvalue_plot_path <- snakemake@output[["dea_pvalue_plot"]]
 
 # parameters
 adj_pval <- as.numeric(snakemake@params[["adj_pval"]]) # 0.05
@@ -144,30 +145,41 @@ ggsave_new(filename = "stats",
                                              
                                              
 # plot P-value distribution as sanity check
-pvalue_plots <- list()                                             
+# pvalue_plots <- list()   
+                                                                                            
+
                                              
 for (group in unique(dea_results$group)){
     tmp_dea_results <- dea_results[dea_results$group==group, ]
 
-    pvalue_plots[[group]] <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + geom_histogram(bins=100) + theme_bw(16) + ggtitle(addline_format(group)) + custom_theme
+#     pvalue_plots[[group]] <-
+    pvalue_plot <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + geom_histogram(bins=100) + theme_bw(16) + ggtitle(addline_format(group)) + custom_theme
+    
+    ggsave_new(filename = group,
+               results_path=dea_pvalue_plot_path, 
+               plot=pvalue_plot, 
+               width=4, 
+               height=4
+              )
+
 }
                                              
-width <- 4
-height <- 4
+# width <- 4
+# height <- 4
 
-n_col <- min(10, length(unique(dea_results$group)))
+# n_col <- min(10, length(unique(dea_results$group)))
 
-width_panel <- n_col * width + 1
-height_panel <- height * ceiling(length(unique(dea_results$group))/n_col)
+# width_panel <- n_col * width + 1
+# height_panel <- height * ceiling(length(unique(dea_results$group))/n_col)
 
-pvalue_plots_panel <- wrap_plots(pvalue_plots, ncol = n_col, guides = "collect")
+# pvalue_plots_panel <- wrap_plots(pvalue_plots, ncol = n_col, guides = "collect")
 
 # save plot
 # options(repr.plot.width=width_panel, repr.plot.height=height_panel)
 # print(pvalue_plots_panel)
 
-ggsave_new(filename = "pvalue_distribution", 
-           results_path=dirname(dea_stats_plot_path), 
-           plot=pvalue_plots_panel, 
-           width=width_panel, 
-           height=height_panel)
+# ggsave_new(filename = "pvalue_distribution", 
+#            results_path=dirname(dea_stats_plot_path), 
+#            plot=pvalue_plots_panel, 
+#            width=width_panel, 
+#            height=height_panel)

@@ -51,6 +51,16 @@ rule aggregate:
                                       "type": "Bar plot",
                                       "misc": "PNG",
                                   }),
+        dea_pvalue_plot = report(directory(os.path.join(result_path,'{analysis}','plots','pvalue_distribution')), 
+                                  patterns=["{group}.png"],
+                                 caption="../report/pvalue_distribution.rst", 
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "P-value distribution",
+                                      "type": "{group}",
+                                      "misc": "PNG",
+                                  }),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)

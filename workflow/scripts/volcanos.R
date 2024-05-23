@@ -111,7 +111,7 @@ for (group in unique(dea_results$group)){
                     axisLabSize = 12,
                     title = addline_format(group),
                     subtitle = '', # default: bquote(italic(EnhancedVolcano))
-                    caption = paste0("variables:",nrow(toptable),"; log2FC>",FCcutoff,"; adj.p-val<",pCutoff),
+                    caption = paste0("variables:",nrow(toptable),"; |avg.log2FC|>",FCcutoff,"; adj.p-val<",pCutoff),
                     titleLabSize = 14,
                     subtitleLabSize = 0,
                     captionLabSize = 6,
