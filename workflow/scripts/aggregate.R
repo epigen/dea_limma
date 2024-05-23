@@ -1,6 +1,7 @@
 #### load libraries & utility function 
-library(ggplot2)
-library(patchwork)
+library("ggplot2")
+library("patchwork")
+library("data.table")
 # library(reshape2)
 
 # source utility functions
@@ -14,7 +15,6 @@ dea_result_path <- snakemake@input[["dea_results"]]
 dea_stats_path <- snakemake@output[["dea_stats"]]
 dea_lfc_path <- snakemake@output[["dea_lfc"]]
 dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]]
-
 
 # parameters
 adj_pval <- as.numeric(snakemake@params[["adj_pval"]]) # 0.05
@@ -33,7 +33,8 @@ if (!dir.exists(results_path)){
 }
 
 ### load DEA results
-dea_results <- read.csv(file=file.path(dea_result_path))
+# dea_results <- read.csv(file=file.path(dea_result_path))
+dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
 groups <- unique(dea_results$group)
 
 ### save list of all expressed (and all significant features) for downstream analysis (eg as background in enrichment analyses)
@@ -63,12 +64,15 @@ if (score_formula!=""){
     
     for (group in groups){
         tmp_features <- dea_results[(dea_results$group==group),c("feature","score")]
-        write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores.csv")), row.names=FALSE)
+#         write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores.csv")), row.names=FALSE)
+        fwrite(as.data.frame(tmp_features), file=file.path(results_path,paste0(group,"_featureScores.csv")), row.names=FALSE)
+
 
         if("feature_name" %in% colnames(dea_results)){
             tmp_features <- dea_results[(dea_results$group==group),c("feature_name","score")]
             tmp_features <- tmp_features[tmp_features$feature_name != "",]
-            write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores_annot.csv")), row.names=FALSE)
+#             write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores_annot.csv")), row.names=FALSE)
+            fwrite(as.data.frame(tmp_features), file=file.path(results_path,paste0(group,"_featureScores_annot.csv")), row.names=FALSE)
         }
     }
 }
@@ -85,29 +89,8 @@ dea_filtered_stats <- table(dea_filtered_results$group, dea_filtered_results$dir
 dea_filtered_stats_df <- as.data.frame.matrix(dea_filtered_stats)
 dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
                                              
-write.csv(dea_filtered_stats_df, file=file.path(dea_stats_path), row.names=TRUE)
-
-### aggregate & save LFC matrix from all DEA results -> NOT USED
-
-# features <- unique(dea_filtered_results$feature)
-                                             
-# lfc_df <- data.frame(matrix(nrow=length(features), ncol=length(groups), dimnames=list(features, groups)))
-
-# for (group in groups){
-#     tmp_dea_results <- dea_results[dea_results$group==group, ]
-#     rownames(tmp_dea_results) <- tmp_dea_results$feature
-#     lfc_df[features, group] <- tmp_dea_results[features, 'logFC']
-# }
-# lfc_df <- dcast(dea_results, feature ~ group, value.var = 'logFC')
-# write.csv(lfc_df, file=file.path(dea_lfc_path), row.names=TRUE)
-                                             
-# if("feature_name" %in% colnames(dea_results)){
-#     tmp_dea_results <- dea_results[dea_results$group==groups[1], ]
-#     rownames(tmp_dea_results) <- tmp_dea_results$feature
-#     lfc_df$feature_name <- tmp_dea_results[rownames(lfc_df), 'feature_name']
-#     lfc_df <- lfc_df[,c(ncol(lfc_df),1:(ncol(lfc_df)-1))]
-#     write.csv(lfc_df, file=file.path(dirname(file.path(dea_stats_path)),"DEA_LFC_annot.csv"), row.names=FALSE)
-# }
+# write.csv(dea_filtered_stats_df, file=file.path(dea_stats_path), row.names=TRUE)
+fwrite(as.data.frame(dea_filtered_stats_df), file=file.path(dea_stats_path), row.names=TRUE)
 
 ### save differential feature lists from filtered DEA results for downstream analysis (eg enrichment analysis)
 for (group in unique(dea_filtered_results$group)){

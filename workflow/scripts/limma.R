@@ -1,7 +1,8 @@
 #### load libraries & utility function 
-library(limma)
-library(edgeR)
-library(statmod)
+library("limma")
+library("edgeR")
+library("statmod")
+library("data.table")
 
 # inputs
 data_path <- snakemake@input[[1]]
@@ -33,20 +34,23 @@ if (!dir.exists(result_dir)){
     }
 
 ### load data
-data <- read.csv(file=data_path, row.names=1)
+# data <- read.csv(file=data_path, row.names=1)
+data <- data.frame(fread(file.path(data_path), header=TRUE), row.names=1)
 stopifnot(isNumeric(data))
 print("data")
 print(dim(data))
 
 ### load metadata
 metadata <- read.csv(file=metadata_path, row.names=1, na.strings=c("NA",""))
+metadata <- data.frame(fread(file.path(metadata_path), header=TRUE, na.strings=c("NA", "")), row.names=1)
 rownames(metadata) <- make.names(rownames(metadata))
 print("metadata")
 print(dim(metadata))
 
 ### load feature annotation file (optional)
 if (feature_annotation[["path"]]!=""){
-    feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1)
+#     feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1)
+    feature_annot <- data.frame(fread(file.path(feature_annotation[["path"]]), header=TRUE), row.names=1)
     print("feature_annot")
     print(dim(feature_annot))
 }

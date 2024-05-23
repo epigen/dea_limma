@@ -5,3 +5,4 @@ channels:
 dependencies:
   - bioconductor-enhancedvolcano=1.12.0
   - r-patchwork=1.1.2
+  - r-data.table

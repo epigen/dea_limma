@@ -1,7 +1,8 @@
 #### load libraries & utility function 
-library(EnhancedVolcano, quietly=TRUE)
-library(patchwork, quietly=TRUE)
-library(ggplot2)
+library("EnhancedVolcano", quietly=TRUE)
+library("patchwork", quietly=TRUE)
+library("ggplot2")
+library("data.table")
 
 # source utility functions
 # source("workflow/scripts/utils.R")
@@ -24,7 +25,8 @@ width <- 4
 height <- 5
 
 ### load DEA results
-dea_results <- read.csv(file=file.path(dea_result_path))
+# dea_results <- read.csv(file=file.path(dea_result_path))
+dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
 
 # load feature list if not ALL
 if (feature_list_name!="ALL"){

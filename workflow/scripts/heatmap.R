@@ -1,9 +1,10 @@
 #### load libraries & utility function 
-library(pheatmap)
-library(patchwork)
-library(ggplot2)
-library(ggplotify)
-library(reshape2)
+library("pheatmap")
+library("patchwork")
+library("ggplot2")
+library("ggplotify")
+library("reshape2")
+library("data.table")
 
 # source utility functions
 # source("workflow/scripts/utils.R")
@@ -26,12 +27,9 @@ feature_list_name <- snakemake@wildcards[["feature_list"]]
 width <- 0.25
 height <- 0.15
 
-
-# ### load LFC DEA results
-# dea_lfc <- read.csv(file=file.path(dea_lfc_path), row.names = 1)
-
 ### load DEA results
-dea_results <- read.csv(file=file.path(dea_result_path))
+# dea_results <- read.csv(file=file.path(dea_result_path))
+dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
 
 # generate or load feature list
 if (feature_list_name=="FILTERED"){
