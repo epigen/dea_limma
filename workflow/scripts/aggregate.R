@@ -23,7 +23,7 @@ ave_expr <- as.numeric(snakemake@params[["ave_expr"]]) # 0
 score_formula <- snakemake@params[["score_formula"]] # "-log10(dea_results$P.Value)*sign(dea_results$logFC)"
 
 # plot specifications
-width <- 0.5
+width <- 0.25
 height <- 5
 
 # make result directory for feature lists if not exist
@@ -102,25 +102,43 @@ if("feature_name" %in% colnames(dea_results)){
 }                                             
                                              
 ### visualize & save DEA statistics
-width_panel <- length(groups) * width + 1.5
+width_panel <- length(groups) * width + 2
                                              
-dea_results_p <- ggplot(dea_filtered_results, aes(x=group, fill=direction)) + 
-                                             geom_bar() + 
-                                             xlab("groups") +
+# dea_results_p <- ggplot(dea_filtered_results, aes(x=group, fill=direction)) + 
+#                                              geom_bar() + 
+#                                              xlab("groups") +
+#                                              ylab("number of differential features") +
+#                                              scale_y_continuous(limits = c(0, NA), expand = c(0, 0)) +
+#                                              scale_x_discrete(label=addline_format) +
+#                                              scale_fill_manual(values=list(up="red", down="blue"), drop=FALSE) +
+#                                              custom_theme +
+#                                              theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1, size = 6)) # rotates the x-Axis
+
+dea_filtered_stats_df$total <- NULL
+dea_filtered_stats_df[,"down"] <- -1 * dea_filtered_stats_df[,"down"]
+plot_stats_df <- stack(dea_filtered_stats_df)
+colnames(plot_stats_df) <- c("n_features","direction")
+plot_stats_df$groups <- rep(rownames(dea_filtered_stats_df), ncol(dea_filtered_stats_df))
+
+# plot
+dea_filtered_results_p <- ggplot(plot_stats_df, aes(x=groups, y=n_features, fill=direction)) + 
+                                             geom_bar(stat="identity", position="identity") +
+                                             xlab(metadata) +
                                              ylab("number of differential features") +
-                                             scale_y_continuous(limits = c(0, NA), expand = c(0, 0)) +
-                                             scale_x_discrete(label=addline_format) +
-                                             scale_fill_manual(values=list(up="red", down="blue"), drop=FALSE) +
+                                             scale_fill_manual(values=list("down"="blue", "up"="red"), drop=FALSE) +
+                                             scale_y_continuous(labels = function(y) sapply(y, function(y) ifelse(y < 0, paste0(sub("-", "", as.character(y))), y))) +
                                              custom_theme +
-                                             theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1, size = 6)) # rotates the x-Axis
-                                             
+                                             theme(#legend.position = "none",
+                                                   axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 6)
+                                                  )
+
                                              
 # save plot
 # options(repr.plot.width=width_panel, repr.plot.height=height)
 # print(dea_results_p)
 ggsave_new(filename = "stats", 
            results_path=dirname(dea_stats_plot_path), 
-           plot=dea_results_p, 
+           plot=dea_filtered_results_p, #dea_results_p, 
            width=width_panel, 
            height=height)
                                              
