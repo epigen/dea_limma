@@ -6,10 +6,8 @@ import pandas as pd
 import yaml
 from snakemake.utils import min_version
 
-min_version("6.0.3")
-
-SDIR = os.path.realpath(os.path.dirname(srcdir("Snakefile")))
-shell.prefix(f"set -eo pipefail;")
+##### set minimum snakemake version #####
+min_version("7.15.2")
 
 module_name = "dea_limma"
 
