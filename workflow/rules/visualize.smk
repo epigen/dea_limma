@@ -2,15 +2,16 @@
 # visualize DEA results using volcano plots
 rule volcanos:
     input:
-        dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
+        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
-        dea_volcanos = report(os.path.join(result_path,'{analysis}','plots','DEA_volcanos_{feature_list}_{pval_type}.png'),
+        dea_volcanos = report(directory(os.path.join(result_path,'{analysis}','plots','volcano','{feature_list}')),
+                              patterns=["{group}.png"],
                               caption="../report/volcano.rst",
                               category="{}_{}".format(config["project_name"], module_name),
                               subcategory="{analysis}",
                               labels={
-                                  "name": "Volcano plot",
-                                  "type": "{pval_type}",
+                                  "name": "Volcano",
+                                  "type": "{group}",
                                   "misc": "{feature_list}",
                               }),
     resources:
@@ -19,7 +20,7 @@ rule volcanos:
     conda:
         "../envs/volcanos.yaml"
     log:
-        os.path.join("logs","rules","volcanos_{analysis}_{feature_list}_{pval_type}.log"),
+        os.path.join("logs","rules","volcanos_{analysis}_{feature_list}.log"),
     params:
         partition=config.get("partition"),
         pCutoff = config["volcano"]["pCutoff"],
@@ -30,16 +31,15 @@ rule volcanos:
 # visualize LFC of DEA results
 rule lfc_heatmap:
     input:
-        dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
-#         dea_lfc = os.path.join(result_path,'{analysis}','DEA_LFC.csv'),
+        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
-        dea_lfc_heatmap = report(os.path.join(result_path,'{analysis}','plots','DEA_LFC_heatmap_{feature_list}.png'),
+        dea_lfc_heatmap = report(os.path.join(result_path,'{analysis}','plots','heatmap','{feature_list}.png'),
                               caption="../report/lfc_heatmap.rst",
                               category="{}_{}".format(config["project_name"], module_name),
                               subcategory="{analysis}",
                               labels={
                                   "name": "Heatmap",
-                                  "type": "effect sizes",
+                                  "type": "Effect sizes",
                                   "misc": "{feature_list}",
                               }),
     resources:

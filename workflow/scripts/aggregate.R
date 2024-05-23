@@ -13,7 +13,7 @@ dea_result_path <- snakemake@input[["dea_results"]]
 
 # outputs
 dea_stats_path <- snakemake@output[["dea_stats"]]
-dea_lfc_path <- snakemake@output[["dea_lfc"]]
+all_features_path <- snakemake@output[["all_features"]]
 dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]]
 
 # parameters
@@ -27,7 +27,7 @@ width <- 0.5
 height <- 5
 
 # make result directory for feature lists if not exist
-results_path <- file.path(dirname(file.path(dea_stats_path)),"feature_lists")
+results_path <- dirname(file.path(all_features_path))
 if (!dir.exists(results_path)){
     dir.create(results_path, recursive = TRUE)
 }
@@ -41,21 +41,10 @@ groups <- unique(dea_results$group)
 all_features <- unique(dea_results$feature)
 write(all_features, file.path(results_path, "ALL_features.txt"))
 
-# filtered_features <- unique(dea_results[(dea_results$adj.P.Val <= adj_pval) & 
-#                                   (abs(dea_results$logFC) >= lfc) & 
-#                                   (dea_results$AveExpr >= ave_expr),'feature'])
-# write(filtered_features, file.path(results_path, "FILTERED_features.txt"))
-
 if("feature_name" %in% colnames(dea_results)){
     all_features_annot <- unique(dea_results$feature_name)
     all_features_annot <- all_features_annot[all_features_annot != ""]
     write(all_features_annot, file.path(results_path, "ALL_features_annot.txt"))
-    
-#     filtered_features_annot <- unique(dea_results[(dea_results$adj.P.Val <= adj_pval) & 
-#                                   (abs(dea_results$logFC) >= lfc) & 
-#                                   (dea_results$AveExpr >= ave_expr),'feature_name'])
-#     filtered_features_annot <- filtered_features_annot[filtered_features_annot != ""]
-#     write(filtered_features_annot, file.path(results_path, "FILTERED_features_annot.txt"))
 }
 
 # determine and save feature scores for each gene and group for downstream analysis e.g., preranked GSEA
@@ -129,7 +118,7 @@ dea_results_p <- ggplot(dea_filtered_results, aes(x=group, fill=direction)) +
 # save plot
 # options(repr.plot.width=width_panel, repr.plot.height=height)
 # print(dea_results_p)
-ggsave_new(filename = "DEA_stats", 
+ggsave_new(filename = "stats", 
            results_path=dirname(dea_stats_plot_path), 
            plot=dea_results_p, 
            width=width_panel, 
@@ -159,7 +148,7 @@ pvalue_plots_panel <- wrap_plots(pvalue_plots, ncol = n_col, guides = "collect")
 # options(repr.plot.width=width_panel, repr.plot.height=height_panel)
 # print(pvalue_plots_panel)
 
-ggsave_new(filename = "DEA_pvalue_distribution", 
+ggsave_new(filename = "pvalue_distribution", 
            results_path=dirname(dea_stats_plot_path), 
            plot=pvalue_plots_panel, 
            width=width_panel, 

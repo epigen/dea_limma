@@ -4,7 +4,7 @@ rule dea:
     input:
         get_paths
     output:
-        dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
+        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
         lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
     resources:
         mem_mb=config.get("mem", "16000"),
@@ -30,27 +30,25 @@ rule dea:
 # aggregate results per analysis
 rule aggregate:
     input:
-        dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
+        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
         all_features = os.path.join(result_path,'{analysis}','feature_lists','ALL_features.txt'),
-        # filtered_features = os.path.join(result_path,'{analysis}','feature_lists','FILTERED_features.txt'),
-        dea_stats = report(os.path.join(result_path,'{analysis}','DEA_stats.csv'), 
+        dea_stats = report(os.path.join(result_path,'{analysis}','stats.csv'), 
                                   caption="../report/dea_stats.rst", 
                                   category="{}_{}".format(config["project_name"], module_name),
                                   subcategory="{analysis}",
                                   labels={
-                                      "name": "DEA statistics",
+                                      "name": "Statistics",
                                       "type": "table",
                                       "misc": "CSV",
                                   }),
-        # dea_lfc = os.path.join(result_path,'{analysis}','DEA_LFC.csv'),
-        dea_stats_plot = report(os.path.join(result_path,'{analysis}','plots','DEA_stats.png'), 
+        dea_stats_plot = report(os.path.join(result_path,'{analysis}','plots','stats.png'), 
                                   caption="../report/dea_stats.rst", 
                                   category="{}_{}".format(config["project_name"], module_name),
                                   subcategory="{analysis}",
                                   labels={
-                                      "name": "DEA statistics",
-                                      "type": "stacked bar plot",
+                                      "name": "Statistics",
+                                      "type": "Bar plot",
                                       "misc": "PNG",
                                   }),
     resources:

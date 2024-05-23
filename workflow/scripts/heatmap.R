@@ -46,6 +46,17 @@ if (feature_list_name=="FILTERED"){
     }
 }
 
+# if no features in the results, end early with empty plot
+if(length(feature_list)==0){
+    ggsave_new(filename = feature_list_name, 
+           results_path=dirname(lfc_heatmap_path), 
+           plot = ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Features not found in DEA results.") + theme_void(), 
+           width=4, 
+           height=1)
+    
+    quit(save = "no", status = 0)
+}
+
 
 # make LFC dataframe
 lfc_df <- dcast(dea_results, feature ~ group, value.var = 'logFC')
@@ -115,7 +126,7 @@ if(nrow(lfc_df)<50000){
 # options(repr.plot.width=width_panel, repr.plot.height=height)
 # print(lfc_heatmap)
 
-ggsave_new(filename = paste0("DEA_LFC_heatmap_",feature_list_name), 
+ggsave_new(filename = feature_list_name, 
            results_path=dirname(dea_lfc_heatmap_path), 
            plot=lfc_heatmap, 
            width=width_panel, 

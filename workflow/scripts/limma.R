@@ -26,7 +26,6 @@ voom_flag <- snakemake@params[["voom"]] #1
 eBayes_flag <- snakemake@params[["eBayes"]] #1
 limma_trend <- snakemake@params[["limma_trend"]] #0
 
-
 result_dir <- dirname(dea_result_path)
 # make directories if not exist
 if (!dir.exists(result_dir)){
@@ -41,7 +40,7 @@ print("data")
 print(dim(data))
 
 ### load metadata
-metadata <- read.csv(file=metadata_path, row.names=1, na.strings=c("NA",""))
+# metadata <- read.csv(file=metadata_path, row.names=1, na.strings=c("NA",""))
 metadata <- data.frame(fread(file.path(metadata_path), header=TRUE, na.strings=c("NA", "")), row.names=1)
 rownames(metadata) <- make.names(rownames(metadata))
 print("metadata")
@@ -94,7 +93,8 @@ for(col in names(reference_levels)){
 # create model matrix
 model_matrix <- model.matrix(design, metadata)
 # save model matrix
-write.csv(model_matrix, file=file.path(result_dir,"model_matrix.csv"))
+# write.csv(model_matrix, file=file.path(result_dir,"model_matrix.csv"))
+fwrite(as.data.frame(model_matrix), file=file.path(result_dir,"model_matrix.csv"), row.names=TRUE)
 
 # check if the model represented by the design matrix has full rank ie linearly independent columns, which is required to make the model identifiable!
 # new: more efficient and computationally stable compared to the svd() function, especially for large matrices, and it does not require rounding the singular values or checking for non-zero values.
@@ -215,4 +215,5 @@ for(coefx in colnames(coef(lmfit))){
 dea_results <- dea_results[!is.na(dea_results$adj.P.Val),]
 
 ### save DEA results
-write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)
+# write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)
+fwrite(as.data.frame(dea_results), file=file.path(dea_result_path), row.names=FALSE)
