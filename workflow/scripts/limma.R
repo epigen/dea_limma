@@ -161,6 +161,8 @@ if(block_var!=0){
                                       
 # save fitted model object for manual downstream analyses e.g., contrasts
 saveRDS(lmfit, file = file.path(lmfit_object_path))
+# save the used expression matrix input object
+saveRDS(v, file = file.path(result_dir, "expression_matrix.rds"))
 
 # plot mean-variance trend of fitted model
 pdf(file=file.path(result_dir,"mean_var_trend_fitted.pdf"))
