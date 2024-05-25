@@ -36,9 +36,19 @@ if feature_lists_dict is not None:
 
 result_path = os.path.join(config["result_path"], module_name)
 
+##### load rules #####
+include: os.path.join("rules", "common.smk")
+include: os.path.join("rules", "dea.smk")
+include: os.path.join("rules", "visualize.smk")
+include: os.path.join("rules", "envs_export.smk")
+
+##### target rule #####
 rule all:
     input:
         results = expand(os.path.join(result_path,'{analysis}','results.csv'),
+                            analysis = analyses,
+                           ),
+        result_feature_lists = expand(os.path.join(result_path, '{analysis}', 'result_feature_lists.txt'),
                             analysis = analyses,
                            ),
         lmfit_objects = expand(os.path.join(result_path,'{analysis}','lmfit_object.rds'),
@@ -68,8 +78,4 @@ rule all:
         partition=config.get("partition"),
 
         
-##### load rules #####
-include: os.path.join("rules", "common.smk")
-include: os.path.join("rules", "dea.smk")
-include: os.path.join("rules", "visualize.smk")
-include: os.path.join("rules", "envs_export.smk")
+

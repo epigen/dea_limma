@@ -28,11 +28,12 @@ rule dea:
         "../scripts/limma.R"
 
 # aggregate results per analysis
-rule aggregate:
+checkpoint aggregate:
     input:
         dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
         all_features = os.path.join(result_path,'{analysis}','feature_lists','ALL_features.txt'),
+        feature_lists = directory(os.path.join(result_path,'{analysis}','feature_lists')),
         dea_stats = report(os.path.join(result_path,'{analysis}','stats.csv'), 
                                   caption="../report/dea_stats.rst", 
                                   category="{}_{}".format(config["project_name"], module_name),
@@ -77,3 +78,20 @@ rule aggregate:
     script:
         "../scripts/aggregate.R"
 
+# intermediate rule required for checkpoint usage with wildcards to aggregate all result feature lists
+rule gather_feature_lists:
+    input:
+        get_feature_lists,
+    output:
+        os.path.join(result_path, '{analysis}', 'result_feature_lists.txt'),
+    resources:
+        mem_mb="1000",
+    threads: 1
+    log:
+        os.path.join("logs","rules","gather_feature_lists_{analysis}.log"),
+    params:
+        partition=config.get("partition"),
+    shell:
+        """
+        echo '{input}' | tr ' ' '\n' > {output}
+        """
