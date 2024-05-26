@@ -1,6 +1,6 @@
 channels:
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
-  - r-ggplot2=3.3.6
-  - r-data.table=1.15.2
+  - patsy=0.5.6

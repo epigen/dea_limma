@@ -6,4 +6,4 @@ dependencies:
   - bioconductor-limma=3.46.0
   - bioconductor-edger=3.32.1
   - r-statmod=1.4.37
-  - r-data.table
+  - r-data.table=1.14.2

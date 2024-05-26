@@ -1,6 +1,6 @@
 #### load libraries & utility function 
 library("EnhancedVolcano", quietly=TRUE)
-library("patchwork", quietly=TRUE)
+# library("patchwork", quietly=TRUE)
 library("ggplot2")
 library("data.table")
 
@@ -75,14 +75,14 @@ for (pval_type in c("adj.P.Val", "P.Value")){
                 # sort results by feature list so they are on top in the plot
                 toptable <- toptable[order(toptable$feature_list),]
                 # highlight features of interest
-                keyvals.alpha <- ifelse(toptable$feature_name %in% feature_list, 1, 0.5)
+                keyvals.alpha <- ifelse(toptable$feature_name %in% feature_list, 0.5, 0.25)
                 keyvals.col <- ifelse(toptable$feature_name %in% feature_list, "red", "grey")
             }else{
                 toptable$feature_list <- ifelse(toptable$feature %in% feature_list, TRUE, FALSE)
                 # sort results by feature list so they are on top in the plot
                 toptable <- toptable[order(toptable$feature_list),]
                 # highlight features of interest
-                keyvals.alpha <- ifelse(toptable$feature %in% feature_list, 1, 0.5)
+                keyvals.alpha <- ifelse(toptable$feature %in% feature_list, 0.5, 0.25)
                 keyvals.col <- ifelse(toptable$feature %in% feature_list, "red", "grey")
             }
 
@@ -125,8 +125,8 @@ for (pval_type in c("adj.P.Val", "P.Value")){
                         cutoffLineType = "longdash",
                         cutoffLineCol = "black",
                         cutoffLineWidth = 0.4,
-                        pointSize = 1, # default: 2
-                        labSize = 3, #default: 5
+                        pointSize = 0.5, # default: 2
+                        labSize = 2, #default: 5
                         labCol = "black",
                         labFace = "plain",
                         boxedLabels = TRUE, #default: FALSE
@@ -187,8 +187,8 @@ for (pval_type in c("adj.P.Val", "P.Value")){
 #                    paste0("DEA_volcanos_",feature_list_name,"_",pval_type), 
                    results_path=volcano_plot_path, 
                    plot=volcano_plot, 
-                   width=width_panel, 
-                   height=height_panel)    
+                   width=width, 
+                   height=height)    
     }
 }
 

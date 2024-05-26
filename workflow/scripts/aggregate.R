@@ -1,6 +1,6 @@
 #### load libraries & utility function 
 library("ggplot2")
-library("patchwork")
+# library("patchwork")
 library("data.table")
 # library(reshape2)
 
@@ -124,7 +124,7 @@ plot_stats_df$groups <- rep(rownames(dea_filtered_stats_df), ncol(dea_filtered_s
 # plot
 dea_filtered_results_p <- ggplot(plot_stats_df, aes(x=groups, y=n_features, fill=direction)) + 
                                              geom_bar(stat="identity", position="identity") +
-                                             xlab(metadata) +
+                                             xlab("groups") +
                                              ylab("number of differential features") +
                                              scale_fill_manual(values=list("down"="blue", "up"="red"), drop=FALSE) +
                                              scale_y_continuous(labels = function(y) sapply(y, function(y) ifelse(y < 0, paste0(sub("-", "", as.character(y))), y))) +
