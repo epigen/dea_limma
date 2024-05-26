@@ -62,7 +62,7 @@ The workflow performs the following steps that produce the outlined results:
   - (optional) __block__ on a "group" factor in case you have repeated measurements (generalized least squares).
       - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
   - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit__.
-      - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts.
+      - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts (see instructions below in [Usage](#usage)).
   - (optional) estimate variance "better" using __eBayes__, with the robustness flag (robust=TRUE), by looking across all genes (i.e. shrunk towards a common value) and compute moderated t-statistics.
       - (optional) eBayes with __limma-trend__ (trend=TRUE)
   - extract all statistics for variables of interest (=configured comparisons) using __topTable__ (eg coefficients/effect size, statistical significance,...).
@@ -91,9 +91,9 @@ The workflow performs the following steps that produce the outlined results:
       - post-fitting mean-variance trend
       - raw p-value distributions (to check for p-value inflation in relation to average expression)
 
-FYI
-- Colons (":") in variable/group names (eg interactions) are replaced with double-underscores ("\_\_") downstream.
-- As of now we do not feature more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses.
+Note
+- Colons (":") in variable/group names (i.e., interactions) are replaced with double-underscores ("\_\_") downstream.
+- We do not support more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses (see instructions below in [Usage](#usage)).
 
 
 # Usage
@@ -102,6 +102,18 @@ Here are some tips for the usage of this workflow:
 - Perform your first run(s) with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
 - Test minimal complex configurations on a subset of your data.
 - Start with simple models and try to understand the results.
+- If you require contrasts to ask questions your model does not answer, just load the fitted model and perform the contrast manually (see examle in [_limma's_ User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf) chapter 9.5):
+  ```R
+  # load model
+  fit <- readRDS(file.path('{result_path}/dea_limma/{analysis}/lmfit_object.rds'))
+  # define and perform contrast (example from limma's User's Guide chapter 9.5.3)
+  fit2 <- contrasts.fit(fit, c(0,0,-1,1))
+  # estimate/correct variance with eBayes
+  fit2 <- eBayes(fit2)
+  # extract results
+  results <- topTable(fit2)
+  # process and visualize results as you wish, feel free to reuse code from this module
+  ```
 
 # Configuration
 Detailed specifications can be found here [./config/README.md](./config/README.md)
@@ -116,10 +128,16 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 - [Snakemake Workflow Catalog Entry](https://snakemake.github.io/snakemake-workflow-catalog?usage=epigen/dea_limma)
 
 # Resources
-- Recommended [MR.PARETO](https://github.com/epigen/mr.pareto) modules for downstream analyses:
+- Recommended [MR.PARETO](https://github.com/epigen/mr.pareto) modules 
+  - for upstream analyses:
+    - TODO
+    - ATACseq
+    - scRNAseq 
+    - spilterlize
+  - for downstream analyses:
     - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis)  for biomedical interpretation of results.
-    - [Genome Tracks](https://github.com/epigen/genome_tracks) for visualization of top hits.
-- [Bioconductor - _limma_](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page userguides
+    - [Genome Tracks](https://github.com/epigen/genome_tracks) for visualization of top hits as genome browser tracks.
+- [Bioconductor - _limma_](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page [User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf)
 - [R Manual on Model Formulae](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html)
 - [Bioconductor - RNAseq123 - Workflow](https://bioconductor.org/packages/release/workflows/html/RNAseq123.html)
 - _limma_ workflow tutorial RNA-seq analysis is easy as 1-2-3 with _limma_, Glimma and edgeR
