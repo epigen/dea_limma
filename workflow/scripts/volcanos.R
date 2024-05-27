@@ -38,24 +38,6 @@ if (feature_list_name!="ALL"){
 dea_results[dea_results$adj.P.Val==0,"adj.P.Val"] <- min(dea_results$adj.P.Val[dea_results$adj.P.Val>0])*10^-1
 dea_results[dea_results$P.Value==0,"P.Value"] <- min(dea_results$P.Value[dea_results$P.Value>0])*10^-1
 
-# n_col <- min(10, length(unique(dea_results$group)))
-# width_panel <- n_col * width + 1
-# height_panel <- height * ceiling(length(unique(dea_results$group))/n_col)
-
-### Visualize DEA results using Volcano plots
-
-# for(pval_type in c('adjp','rawp')){
-    
-# if(pval_type=='adjp'){
-#     y <- "adj.P.Val"
-#     ylab <- bquote(~-log[10] ~ "adjusted p-value")
-# }else{
-#     y <- "P.Value"
-#     ylab <- bquote(~-log[10] ~ "raw p-value")
-# }
-
-# volcano_plots <- list()
-
 for (pval_type in c("adj.P.Val", "P.Value")){
     for (group in unique(dea_results$group)){
         
@@ -63,7 +45,6 @@ for (pval_type in c("adj.P.Val", "P.Value")){
 
         # set volcano parameters
         x <- "logFC"
-    #     y <- "adj.P.Val"
         selectLab <- NULL
         colCustom <- NULL
         colAlpha <- 1/2
@@ -96,18 +77,11 @@ for (pval_type in c("adj.P.Val", "P.Value")){
             colAlpha <- keyvals.alpha
         }
 
-#         if("feature_name" %in% colnames(toptable)){
-#             lab <- toptable$feature_name
-#         }else{
-#             lab <- toptable$feature
-#         }
-
-#         volcano_plots[[group]] <- 
         volcano_plot <- EnhancedVolcano(toptable = toptable,
-                        lab = if("feature_name" %in% colnames(toptable)) toptable$feature_name else toptable$feature,
+                        lab = if (feature_list_name=="ALL") NA else if("feature_name" %in% colnames(toptable)) toptable$feature_name else toptable$feature,
                         x = x,
                         y = pval_type,
-                        selectLab = selectLab,
+                        selectLab = if (feature_list_name=="ALL") NULL else selectLab,
                         xlim = c(min(toptable[[x]], na.rm = TRUE) - 1, max(toptable[[x]], na.rm = TRUE) + 1),
                         ylim = c(0, max(-log10(toptable[[pval_type]]), na.rm = TRUE) + 5),
                         xlab = bquote(~log[2] ~ "fold change"),
@@ -155,7 +129,7 @@ for (pval_type in c("adj.P.Val", "P.Value")){
                         shadeAlpha = 1/2,
                         shadeSize = 0.01,
                         shadeBins = 2,
-                        drawConnectors = TRUE, #default: FALSE
+                        drawConnectors = if (feature_list_name=="ALL") FALSE else TRUE, #default: FALSE
                         widthConnectors = 0.1, # default: 0.5
                         typeConnectors = "closed",
                         endsConnectors = "first",
@@ -184,24 +158,9 @@ for (pval_type in c("adj.P.Val", "P.Value")){
         
         set.seed(42)
         ggsave_new(filename = if(pval_type=='adj.P.Val') paste0(group,"_adjp") else paste0(group,"_rawp"),
-#                    paste0("DEA_volcanos_",feature_list_name,"_",pval_type), 
                    results_path=volcano_plot_path, 
                    plot=volcano_plot, 
                    width=width, 
                    height=height)    
     }
 }
-
-# volcano_plots_panel <- wrap_plots(volcano_plots, ncol = n_col, guides = "collect")
-
-# save plot (plotting in jupyterLab does not work, but ggsave works) https://github.com/slowkow/ggrepel/issues/113
-# options(repr.plot.width=width_panel, repr.plot.height=height_panel)
-# print(volcano_plots_panel)
-
-# set.seed(42)
-# ggsave_new(filename = paste0("DEA_volcanos_",feature_list_name,"_",pval_type), 
-#            results_path=dirname(volcano_plot_path), 
-#            plot=volcano_plots_panel, 
-#            width=width_panel, 
-#            height=height_panel)    
-#}
