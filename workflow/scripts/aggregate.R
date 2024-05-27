@@ -87,6 +87,7 @@ for (group in unique(dea_filtered_results$group)){
     for (direction in unique(dea_filtered_results$direction)){
         
         tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature"]
+        tmp_features <- unique(tmp_features)
         write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features.txt")))
     }
 }
@@ -97,6 +98,7 @@ if("feature_name" %in% colnames(dea_results)){
 
             tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature_name"]
             tmp_features <- tmp_features[tmp_features != ""]
+            tmp_features <- unique(tmp_features)
             write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features_annot.txt")))
         }
     }
