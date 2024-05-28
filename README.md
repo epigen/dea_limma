@@ -128,14 +128,13 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 - [Snakemake Workflow Catalog Entry](https://snakemake.github.io/snakemake-workflow-catalog?usage=epigen/dea_limma)
 
 # Resources
-- Recommended [MR.PARETO](https://github.com/epigen/mr.pareto) modules 
+- Recommended compatible [MR.PARETO](https://github.com/epigen/mr.pareto) modules 
   - for upstream analyses:
-    - TODO
-    - ATACseq
-    - scRNAseq 
-    - spilterlize
+    - [ATAC-seq Processing](https://github.com/epigen/atacseq_pipeline) to quantify chromatin accessibility.
+    - [scRNA-seq Data Processing & Visualization](https://github.com/epigen/scrnaseq_processing_seurat) for processing (multimodal) single-cell trascnriptome data.
+    - [Split, Filter, Normalize and Integrate Sequencing Data](https://github.com/epigen/spilterlize_integrate) to process sequencing data.
   - for downstream analyses:
-    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis)  for biomedical interpretation of results.
+    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis) for biomedical interpretation of differential analysis results.
     - [Genome Tracks](https://github.com/epigen/genome_tracks) for visualization of top hits as genome browser tracks.
 - [Bioconductor - _limma_](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page [User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf)
 - [R Manual on Model Formulae](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html)
