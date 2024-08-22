@@ -112,10 +112,10 @@ rule all:
                           analysis = analyses,
                           feature_list = feature_lists + ['FILTERED'],
                          ),
-        envs = expand(os.path.join(config["result_path"],'envs',module_name,'{env}.yaml'),env=['limma','volcanos','ggplot','heatmap']),
-        configs = os.path.join(config["result_path"],'configs',module_name,'{}_config.yaml'.format(config["project_name"])),
-        annotations = os.path.join(config["result_path"],'configs',module_name,'{}_annot.csv'.format(config["project_name"])),
-        feature_lists = expand(os.path.join(config["result_path"],'configs',module_name,'{feature_list}.txt'), feature_list = feature_lists),
+        envs = expand(os.path.join(result_path,'envs','{env}.yaml'),env=['limma','volcanos','ggplot','heatmap']),
+        configs = os.path.join(result_path,'configs','{}_config.yaml'.format(config["project_name"])),
+        annotations = os.path.join(result_path,'configs','{}_annot.csv'.format(config["project_name"])),
+        feature_lists = expand(os.path.join(result_path,'configs','{feature_list}.txt'), feature_list = feature_lists),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
