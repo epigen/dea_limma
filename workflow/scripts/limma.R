@@ -203,6 +203,14 @@ for(coefx in colnames(coef(lmfit))){
         
         if (feature_annotation[["path"]]!=""){
             tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation[["column"]]]
+
+            # Add chromosomal location for bed files if feature type is regions
+            # i.e. if "peak_id" is a column in feature_annotations
+            if ("peak_id" %in% colnames(feature_annot)){
+                tmp_res$gencode_chr <- feature_annot[tmp_res$feature, "gencode_chr"]
+                tmp_res$gencode_start <- feature_annot[tmp_res$feature, "gencode_start"]
+                tmp_res$gencode_end <- feature_annot[tmp_res$feature, "gencode_end"]
+            }
         }
     
         if(dim(dea_results)[1]==0){
