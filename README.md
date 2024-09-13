@@ -1,7 +1,10 @@
-# Differential Analysis & Visualization Snakemake Workflow Using _limma_
+
 [![DOI](https://zenodo.org/badge/524038188.svg)](https://zenodo.org/badge/latestdoi/524038188)
 
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [_limma_](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
+# Differential Analysis & Visualization Snakemake Workflow Using _limma_
+
+
+A [Snakemake 8](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [_limma_](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
 
 This workflow adheres to the module specifications of [MR.PARETO](https://github.com/epigen/mr.pareto), an effort to augment research by modularizing (biomedical) data science. For more details and modules check out the project's repository. Please consider **starring** and sharing modules that are interesting or useful to you, this helps others to find and benefit from the effort and me to prioritize my efforts!
 

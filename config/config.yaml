@@ -4,7 +4,6 @@
 ##### RESOURCES #####
 mem: '32000'
 threads: 1
-partition: 'shortq'
 
 ##### GENERAL #####
 

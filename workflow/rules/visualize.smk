@@ -22,7 +22,6 @@ rule volcanos:
     log:
         os.path.join("logs","rules","volcanos_{analysis}_{feature_list}.log"),
     params:
-        partition=config.get("partition"),
         pCutoff = config["volcano"]["pCutoff"],
         FCcutoff = config["volcano"]["FCcutoff"],
     script:
@@ -50,7 +49,6 @@ rule lfc_heatmap:
     log:
         os.path.join("logs","rules","lfc_heatmap_{analysis}_{feature_list}.log"),
     params:
-        partition=config.get("partition"),
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
         ave_expr = config["filters"]["ave_expr"],

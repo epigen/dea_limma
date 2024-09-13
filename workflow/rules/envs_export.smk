@@ -9,12 +9,10 @@ rule env_export:
     conda:
         "../envs/{env}.yaml"
     resources:
-        mem_mb=1000, #config.get("mem", "16000"),
+        mem_mb=1000,
     threads: config.get("threads", 1)
     log:
         os.path.join("logs","rules","env_{env}.log"),
-    params:
-        partition=config.get("partition"),
     shell:
         """
         conda env export > {output}
@@ -33,8 +31,6 @@ rule config_export:
     threads: config.get("threads", 1)
     log:
         os.path.join("logs","rules","config_export.log"),
-    params:
-        partition=config.get("partition"),
     run:
         with open(output["configs"], 'w') as outfile:
             yaml.dump(config, outfile, sort_keys=False, width=1000, indent=2)
@@ -50,12 +46,10 @@ rule annot_export:
                          subcategory="{}_{}".format(config["project_name"], module_name)
                         )
     resources:
-        mem_mb=1000, #config.get("mem_small", "16000"),
+        mem_mb=1000,
     threads: config.get("threads", 1)
     log:
         os.path.join("logs","rules","annot_export.log"),
-    params:
-        partition=config.get("partition"),
     shell:
         """
         cp {input} {output}
@@ -72,12 +66,10 @@ rule feature_list_export:
                             subcategory="{}_{}".format(config["project_name"], module_name)
                            ),
     resources:
-        mem_mb=1000, #config.get("mem_small", "16000"),config.get("mem", "16000"),
+        mem_mb=1000,
     threads: config.get("threads", 1)
     log:
         os.path.join("logs","rules","feature_list_export_{feature_list}.log"),
-    params:
-        partition=config.get("partition"),
     shell:
         """
         cp {input} {output}
