@@ -109,7 +109,7 @@ if("gencode_chr" %in% colnames(dea_results)){
         for (direction in unique(dea_filtered_results$direction)){
             tmp_bed <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction), bed_cols]
             tmp_bed <- unique(tmp_bed)
-            fwrite(tmp_bed, file=file.path(results_path, paste0(group,"_",direction,"_features.bed")), sep="\t", row.names=FALSE, col.names=FALSE))
+            fwrite(tmp_bed, file=file.path(results_path, paste0(group,"_",direction,"_features.bed")), sep="\t", row.names=FALSE, col.names=FALSE)
         }
     }
 }
