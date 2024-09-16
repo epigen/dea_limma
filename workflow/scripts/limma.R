@@ -49,7 +49,10 @@ print(dim(metadata))
 ### load feature annotation file (optional)
 if (feature_annotation[["path"]]!=""){
 #     feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1)
-    feature_annot <- data.frame(fread(file.path(feature_annotation[["path"]]), header=TRUE), row.names=1)
+    # keep feature column name for determining what kind of data it is, and if to generate bed files
+    feature_annot <- data.frame(fread(file.path(feature_annotation[["path"]]), header=TRUE))
+    rownames(feature_annot) <- feature_annot[, 1]
+
     print("feature_annot")
     print(dim(feature_annot))
 }
