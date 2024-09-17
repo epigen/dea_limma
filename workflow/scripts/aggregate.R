@@ -48,15 +48,6 @@ if("feature_name" %in% colnames(dea_results)){
     write(all_features_annot, file.path(results_path, "ALL_features_annot.txt"))
 }
 
-# write out as bed file if feature type is region
-# (i.e. there is a column called "gencode_chr" in dea_results
-# which is added by limma.R if "peak_id" is a col in consensus_annotations.csv)
-bed_cols <- c("gencode_chr", "gencode_start", "gencode_end")
-if ("gencode_chr" %in% colnames(dea_results)){
-    all_features_bed <- unique(dea_results[, bed_cols])
-    fwrite(all_features_bed, file=file.path(results_path, "ALL_features_annot.bed"), sep="\t", row.names=FALSE, col.names=FALSE)
-}
-
 # determine and save feature scores for each gene and group for downstream analysis e.g., preranked GSEA
 if (score_formula!=""){
     dea_results$score <- eval(parse(text=score_formula))
@@ -97,31 +88,18 @@ for (group in unique(dea_filtered_results$group)){
         
         tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature"]
         tmp_features <- unique(tmp_features)
-        write(tmp_features, file.path(results_path, paste0(group,"_",direction,"_features.txt")))
+        write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features.txt")))
     }
 }
-
-# write out as bed file if feature type is region
-# (i.e. there is a column called "gencode_chr" in dea_results,
-# which is added by limma.R if "peak_id" is a col in consensus_annotations.csv)
-if("gencode_chr" %in% colnames(dea_results)){
-    for (group in unique(dea_filtered_results$group)){
-        for (direction in unique(dea_filtered_results$direction)){
-            tmp_bed <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction), bed_cols]
-            tmp_bed <- unique(tmp_bed)
-            fwrite(tmp_bed, file=file.path(results_path, paste0(group,"_",direction,"_features.bed")), sep="\t", row.names=FALSE, col.names=FALSE)
-        }
-    }
-}
-
-# write out feature_names
+                                             
 if("feature_name" %in% colnames(dea_results)){
     for (group in unique(dea_filtered_results$group)){
         for (direction in unique(dea_filtered_results$direction)){
+
             tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature_name"]
             tmp_features <- tmp_features[tmp_features != ""]
             tmp_features <- unique(tmp_features)
-            write(tmp_features, file.path(results_path, paste0(group,"_",direction,"_features_annot.txt")))
+            write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features_annot.txt")))
         }
     }
 }                                             

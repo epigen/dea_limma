@@ -9,10 +9,60 @@ import pandas as pd
 import yaml
 from snakemake.utils import min_version
 
+######## CODE BELOW solves Missing Input Exception when used as input module for e.g., enrichment_analysis BUT requires Snakemake 8
+# # Global workflow dependency
+# # https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#global-workflow-dependencies
+# conda:
+#     "envs/global.yaml"
+# from patsy import dmatrix
+
+# import pandas as pd
+# from patsy import dmatrix
+
+# def get_r_style_column_names(formula, file_path, reference_levels=None):
+#     # Load the data from the file
+#     df = pd.read_csv(file_path)
+    
+#     # Set reference levels if provided
+#     if reference_levels:
+#         for var, ref_level in reference_levels.items():
+#             if var in df.columns:
+#                 levels = list(df[var].unique())
+#                 if ref_level in levels:
+#                     levels.remove(ref_level)
+#                     levels = [ref_level] + levels
+#                     df[var] = pd.Categorical(df[var], categories=levels, ordered=True)
+    
+#     # Create the design matrix
+#     X = dmatrix(formula, data=df, return_type='dataframe')
+    
+#     # Convert to the correct R-style column names
+#     def convert_to_r_style(col_name):
+#         # Remove brackets and handle interaction terms
+#         col_name = col_name.replace('[', '').replace(']', '')
+#         col_name = col_name.replace('T.', '')
+#         return col_name
+    
+#     r_style_column_names = [convert_to_r_style(col) for col in X.columns]
+    
+#     return r_style_column_names
+
+# # Apply the function to the provided data and formula
+# file_path = '/mnt/data/annotation (1).csv'
+# formula = '0 + celltype + celltype:genotype'
+# reference_levels = {
+#     'genotype': 'WT'
+# }
+# r_style_column_names = get_r_style_column_names(formula, file_path, reference_levels)
+# print(r_style_column_names)
+
 ##### set minimum snakemake version #####
 min_version("8.20.1")
 
-module_name = "dea_limma_fz"
+module_name = "dea_limma"
+
+##### container image #####
+# containerized: "docker://sreichl/..."
 
 ##### setup report #####
 report: os.path.join("report", "workflow.rst")

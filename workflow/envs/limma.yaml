@@ -7,7 +7,3 @@ dependencies:
   - bioconductor-edger=3.32.1
   - r-statmod=1.4.37
   - r-data.table=1.14.2
-  - r-dplyr
-  - r-optparse
-  - r-rafalib
-  - r-rcolorbrewer
