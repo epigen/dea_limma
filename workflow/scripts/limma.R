@@ -3,6 +3,10 @@ library("limma")
 library("edgeR")
 library("statmod")
 library("data.table")
+library("rafalib")
+library("dplyr")
+library("RColorBrewer")
+
 
 # inputs
 data_path <- snakemake@input[[1]]
@@ -19,10 +23,13 @@ feature_annotation[["column"]] <- base::make.names(feature_annotation[["column"]
 
 reference_levels <- snakemake@params[["reference_levels"]] #list(treatment="UT", time="0h")
 design <- formula(snakemake@params[["formula"]]) #formula("~ treatment")
+design_batch <- formula(snakemake@params[["formula_batch"]]) #formula("~ treatment")
 block_var <- snakemake@params[["block_var"]] #0
 comparisons <- strsplit(snakemake@params[["comparisons"]], "|", fixed=T)[[1]] #strsplit("treatment", "|", fixed=T)
-calcNormFactors_method <- snakemake@params[["calcNormFactors_method"]] #"none"
+calcNormFactors_method <- snakemake@params[["calcNormFactors_method"]] #"TMM"
+filterByExpr_flag <- snakemake@params[["filterByExpr"]] #1
 voom_flag <- snakemake@params[["voom"]] #1
+batch_var <- snakemake@params[["batch_var"]] #1
 eBayes_flag <- snakemake@params[["eBayes"]] #1
 limma_trend <- snakemake@params[["limma_trend"]] #0
 
@@ -49,7 +56,8 @@ print(dim(metadata))
 ### load feature annotation file (optional)
 if (feature_annotation[["path"]]!=""){
 #     feature_annot <- read.csv(file=feature_annotation[["path"]], row.names=1)
-    feature_annot <- data.frame(fread(file.path(feature_annotation[["path"]]), header=TRUE), row.names=1)
+    feature_annot <- data.frame(fread(file.path(feature_annotation[["path"]]), header=TRUE))
+    rownames(feature_annot) <- feature_annot[, 1]
     print("feature_annot")
     print(dim(feature_annot))
 }
@@ -63,6 +71,7 @@ metadata_cols <- unique(unlist(lapply(metadata_cols, function(x) strsplit(x, ":"
 if (block_var!=0){
     metadata_cols <- c(metadata_cols, block_var)
 }
+
 print("relevant metadata")
 print(metadata_cols)
 
@@ -104,16 +113,36 @@ if(qr(model_matrix)$rank != ncol(model_matrix)){
 # old: checks if all the singular values in the SVD decomposition of the model_matrix are non-zero, indicating that the matrix is full rank and invertible.
 # stopifnot(all(round(svd(model_matrix)$d, 6) != 0))
 
+# Plot design matrix model
+pdf(file=file.path(result_dir, "matrix_model.design.pdf"))
+title = 'Matrix model for all design variables in linear model'
+imagemat(model_matrix, main=title)
+dev.off()
        
 ## PREPARE OBJECTS
 # calculate Normalization Factors (optional)
 if (calcNormFactors_method!=0){
     # create dge object
     dge <- DGEList(data, samples=metadata, genes=rownames(data))
+
+    if (filterByExpr_flag != 0){
+        print("Filtering regions")
+        keep = filterByExpr(dge, design=model_matrix)
+        sprintf('filterByExpr: Number of regions kept with cross-cell_type design: %s', sum(keep))
+        dge <- dge[keep, , keep.lib.size=FALSE]
+
+        write.csv(keep,
+          file= file.path(result_dir, "regions.filterByExpr.keep.csv"),
+          quote=FALSE,
+          row.names=TRUE)
+    }
+    # calcNormFactors
+    print("Normalizing counts")
     dge <- calcNormFactors(dge, method=calcNormFactors_method)
     
     # voom (optional)
     if (voom_flag!=0){
+        print("Voom-ing normalized counts")
         pdf(file=file.path(result_dir,"mean_var_trend_voom.pdf"))
         v <- voom(dge, model_matrix, plot=TRUE)
         x <- dev.off()
@@ -126,9 +155,16 @@ if (calcNormFactors_method!=0){
      v <- data
 }
 
+print('\n\nRunning removeBatchEffect')
+coverage_BC <- removeBatchEffect(v, batch=metadata[[batch_var]],
+                   design=model.matrix(design_batch, metadata))
+write.csv(coverage_BC,
+          file=file.path(result_dir, "coverage.batch_corrected.csv"),
+          quote=FALSE,
+          row.names=TRUE)
+
 
 ### perform DEA
-
 # fit linear model with blocking (optional) or without
 if(block_var!=0){
     block <- metadata[[block_var]]
@@ -172,7 +208,7 @@ x <- dev.off()
 # eBayes (optional) without or with limma-trend (optional)
 if (eBayes_flag!=0){
     if(limma_trend==0){
-        lmfit <- eBayes(lmfit, robust=TRUE, trend=FALSE)
+        lmfit <- eBayes(lmfit, robust=FALSE, trend=FALSE)  # Note FZ: Was robust=False prerev Try with and without
     }else{
         lmfit <- eBayes(lmfit, robust=TRUE, trend=TRUE)
     }
@@ -187,6 +223,13 @@ if (eBayes_flag!=0){
     lmfit$p.value <- 2 * pt(-abs(lmfit$t), df = lmfit$df.residual)
     lmfit$lods <- eBayes(lmfit, robust=TRUE, trend=FALSE)$lods
 }
+
+# Write out coefficients
+write.csv(lmfit$coefficients,
+          file= file.path(result_dir, "lmfit.coefficients.csv"),
+          quote=FALSE,
+          row.names=TRUE)
+
 
 # topTable to extract coefficients
 dea_results <- data.frame()
@@ -203,6 +246,14 @@ for(coefx in colnames(coef(lmfit))){
         
         if (feature_annotation[["path"]]!=""){
             tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation[["column"]]]
+
+            # Add chromosomal location for bed files if feature type is regions
+            # i.e. if "peak_id" is a column in feature_annotations
+            if ("peak_id" %in% colnames(feature_annot)){
+                tmp_res$gencode_chr <- feature_annot[tmp_res$feature, "gencode_chr"]
+                tmp_res$gencode_start <- feature_annot[tmp_res$feature, "gencode_start"]
+                tmp_res$gencode_end <- feature_annot[tmp_res$feature, "gencode_end"]
+            }
         }
     
         if(dim(dea_results)[1]==0){
