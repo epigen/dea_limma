@@ -1,34 +1,31 @@
-# Differential Analysis & Visualization Snakemake Workflow Using _limma_
+[![MR.PARETO](https://img.shields.io/badge/MR.PARETO-red)](https://github.com/epigen/mr.pareto/)
 [![DOI](https://zenodo.org/badge/524038188.svg)](https://zenodo.org/badge/latestdoi/524038188)
+[![](https://tokei.rs/b1/github/epigen/dea_limma?category=code)]() 
+[![](https://tokei.rs/b1/github/epigen/dea_limma?category=files)]()
+[![GitHub license](https://img.shields.io/github/license/epigen/dea_limma)](https://github.com/epigen/dea_limma/blob/master/LICENSE)
+![GitHub Release](https://img.shields.io/github/v/release/epigen/dea_limma)
+[![Snakemake](https://img.shields.io/badge/Snakemake->=8.20.1-green)](https://snakemake.readthedocs.io/en/stable/)
 
-A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [_limma_](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
+# Differential Analysis & Visualization Snakemake Workflow Using _limma_
+A [Snakemake 8](https://snakemake.readthedocs.io/en/stable/) workflow for performing and visualizing differential expression (or accessibility) analyses (DEA) of NGS data (eg RNA-seq, ATAC-seq, scRNA-seq,...) powered by the R package [_limma_](https://www.bioconductor.org/packages/release/bioc/html/limma.html).
 
-This workflow adheres to the module specifications of [MR.PARETO](https://github.com/epigen/mr.pareto), an effort to augment research by modularizing (biomedical) data science. For more details and modules check out the project's repository. Please consider **starring** and sharing modules that are interesting or useful to you, this helps others to find and benefit from the effort and me to prioritize my efforts!
+> [!NOTE]  
+> This workflow adheres to the module specifications of [MR.PARETO](https://github.com/epigen/mr.pareto), an effort to augment research by modularizing (biomedical) data science. For more details, instructions, and modules check out the project's repository.
+>
+> ⭐️ **Star and share modules you find valuable** 📤 - help others discover them, and guide our focus for future work!
 
-**If you use this workflow in a publication, please don't forget to give credits to the authors by citing it using this DOI [10.5281/zenodo.7808516](https://doi.org/10.5281/zenodo.7808516).**
+> [!IMPORTANT]  
+> **If you use this workflow in a publication, please don't forget to give credit to the authors by citing it using this DOI [10.5281/zenodo.7808516](https://doi.org/10.5281/zenodo.7808516).**
 
 ![Workflow Rulegraph](./workflow/dags/rulegraph.svg)
 
-Table of contents
-----------------
-  * [Authors](#authors)
-  * [Software](#software)
-  * [Methods](#methods)
-  * [Features](#features)
-  * [Usage](#usage)
-  * [Configuration](#configuration)
-  * [Examples](#examples)
-  * [Links](#links)
-  * [Resources](#resources)
-  * [Publications](#publications)
-
-# Authors
+# 🖋️ Authors
 - [Stephan Reichl](https://github.com/sreichl)
 - [Lukas Folkman](https://github.com/lukas-folkman)
 - [Christoph Bock](https://github.com/chrbock)
 
 
-# Software
+# 💿 Software
 This project wouldn't be possible without the following software and their dependencies:
 
 | Software       | Reference (DOI)                                   |
@@ -41,8 +38,8 @@ This project wouldn't be possible without the following software and their depen
 | _limma_        | https://doi.org/10.1093/nar/gkv007                |
 | Snakemake      | https://doi.org/10.12688/f1000research.29032.2    |
 
-# Methods
-This is a template for the Methods section of a scientific publication and is intended to serve as a starting point. Only retain paragraphs relevant to your analysis. References [ref] to the respective publications are curated in the software table above. Versions (ver) have to be read out from the respective conda environment specifications (.yaml file) or post execution. Parameters that have to be adapted depending on the data or workflow configurations are denoted in squared brackets e.g. [X].
+# 🔬 Methods
+This is a template for the Methods section of a scientific publication and is intended to serve as a starting point. Only retain paragraphs relevant to your analysis. References [ref] to the respective publications are curated in the software table above. Versions (ver) have to be read out from the respective conda environment specifications (`workflow/envs/*.yaml file`) or post-execution in the result directory (`dea_limma/envs/*.yaml`). Parameters that have to be adapted depending on the data or workflow configurations are denoted in squared brackets e.g., [X].
 
 __Differential Expression Analysis (DEA).__ DEA was performed on the quality-controlled filtered [raw/normalized] counts using the _limma_ (ver) [ref] workflow for fitting a linear model [formula] to identify features (genes/regions) that statistically significantly change with [comparisons] compared to the control group [reference levels] (intercept). Briefly, we determined normalization factors with edgeR::calcNormFactors (optional) using method [X], then applied voom (optional) to estimate the mean-variance relationship of the log-counts. We used blocking on (optional) variable [X] to account for repeated measurements, lmFit to fit the model to the data, and finally eBayes (optional) with the robust (and trend flag – optional for normalized data) flag to compute (moderated/ordinary) t-statistics. For each comparison we used topTable to extract feature-wise average expression, effect sizes (log2 fold change) and their statistical significance as adjusted p-values, determined using the Benjamini-Hochberg method. Furthermore, we calculated feature scores, for each feature in all comparisons, using the formula [score_formula] for downstream ranked enrichment analyses. Next, these results were filtered for relevant features based on the following criteria: statistical significance (adjusted p-value < [X]), effect size (absolute log2 fold change > [X]), and expression (average expression > [X]). Finally, we performed hierarchical clustering on the effect sizes (log2 fold changes) of the union of all relevant features and comparison groups.
 
@@ -53,7 +50,7 @@ Finally, quality control plots of the fitted mean-variance relationship and raw 
 
 **The analysis and visualizations described were performed using a publicly available Snakemake (ver) [ref] workflow (ver) [[10.5281/zenodo.7808516](https://doi.org/10.5281/zenodo.7808516)].**
 
-# Features
+# 🚀 Features
 The workflow performs the following steps that produce the outlined results:
 
 - Differential Expression Analysis (DEA) steps:
@@ -96,7 +93,7 @@ Note
 - We do not support more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses (see instructions below in [Usage](#usage)).
 
 
-# Usage
+# 🛠️ Usage
 Here are some tips for the usage of this workflow:
 - _limma_ usage and best practices are not explained. For deatiled documentation, tutorials and insctructions see [Resources](#resources). To understand the implementation at hand see [limma.R](./workflow/scripts/limma.R).
 - Perform your first run(s) with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
@@ -115,27 +112,28 @@ Here are some tips for the usage of this workflow:
   # process and visualize results as you wish, feel free to reuse code from this module
   ```
 
-# Configuration
+# ⚙️ Configuration
 Detailed specifications can be found here [./config/README.md](./config/README.md)
 
-# Examples
+# 📖 Examples
 --- COMING SOON ---
 
-# Links
+# 🔗 Links
 - [GitHub Repository](https://github.com/epigen/dea_limma/)
 - [GitHub Page](https://epigen.github.io/dea_limma/)
 - [Zenodo Repository](https://doi.org/10.5281/zenodo.7808516)
 - [Snakemake Workflow Catalog Entry](https://snakemake.github.io/snakemake-workflow-catalog?usage=epigen/dea_limma)
 
-# Resources
+# 📚 Resources
 - Recommended compatible [MR.PARETO](https://github.com/epigen/mr.pareto) modules 
   - for upstream analyses:
     - [ATAC-seq Processing](https://github.com/epigen/atacseq_pipeline) to quantify chromatin accessibility.
-    - [scRNA-seq Data Processing & Visualization](https://github.com/epigen/scrnaseq_processing_seurat) for processing (multimodal) single-cell trascnriptome data.
-    - [Split, Filter, Normalize and Integrate Sequencing Data](https://github.com/epigen/spilterlize_integrate) to process sequencing data.
+    - [scRNA-seq Data Processing & Visualization](https://github.com/epigen/scrnaseq_processing_seurat) for processing (multimodal) single-cell transcriptome data.
+    - [<ins>Sp</ins>lit, F<ins>ilter</ins>, Norma<ins>lize</ins> and <ins>Integrate</ins> Sequencing Data](https://github.com/epigen/spilterlize_integrate/) after count quantification.
   - for downstream analyses:
-    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis) for biomedical interpretation of differential analysis results.
-    - [Genome Tracks](https://github.com/epigen/genome_tracks) for visualization of top hits as genome browser tracks.
+    - [Enrichment Analysis](https://github.com/epigen/enrichment_analysis) for biomedical interpretation of (differential) analysis results using prior knowledge.
+    - [Unsupervised Analysis](https://github.com/epigen/unsupervised_analysis) to understand and visualize similarities and variations between cells/samples, including dimensionality reduction and cluster analysis. Useful for all tabular data including single-cell and bulk sequencing data.
+    - [Genome Browser Track Visualization](https://github.com/epigen/genome_tracks/) for quality control and visual inspection/analysis of genomic regions/genes of interest or top hits.
 - [Bioconductor - _limma_](http://bioconductor.org/packages/release/bioc/html/limma.html) includes a 150 page [User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf)
 - [R Manual on Model Formulae](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html)
 - [Bioconductor - RNAseq123 - Workflow](https://bioconductor.org/packages/release/workflows/html/RNAseq123.html)
@@ -156,6 +154,11 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
     - [variancePartition](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-1323-z)
     - [dream](https://academic.oup.com/bioinformatics/article/37/2/192/5878955)
 
-# Publications
+# 📑 Publications
 The following publications successfully used this module for their analyses.
+- [FirstAuthors et al. (202X) Journal Name - Paper Title.](https://doi.org/10.XXX/XXXX)
 - ...
+
+# ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=epigen/dea_limma&type=Date)](https://star-history.com/#epigen/dea_limma&Date)

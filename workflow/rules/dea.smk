@@ -14,7 +14,6 @@ rule dea:
     log:
         os.path.join("logs","rules","dea_{analysis}.log"),
     params:
-        partition=config.get("partition"),
         feature_annotation = config["feature_annotation"],
         reference_levels = config["reference_levels"],
         formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
@@ -73,7 +72,6 @@ checkpoint aggregate:
     log:
         os.path.join("logs","rules","aggregate_{analysis}.log"),
     params:
-        partition=config.get("partition"),
         score_formula = config["score_formula"],
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
@@ -92,8 +90,6 @@ rule gather_feature_lists:
     threads: 1
     log:
         os.path.join("logs","rules","gather_feature_lists_{analysis}.log"),
-    params:
-        partition=config.get("partition"),
     shell:
         """
         echo '{input}' | tr ' ' '\n' > {output}

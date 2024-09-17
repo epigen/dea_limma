@@ -1,8 +1,8 @@
 # Configuration
 
-You need one configuration file and one annotation file to run the complete workflow. Additionally, you can provide feature annotation file in the project configuration (eg for plotting gene symbols instead of ensembl terms). You can use the provided example as starting point. Always use absolute paths. If in doubt read the comments in the config and/or try the default values.
+You need one configuration file and one annotation file to run the complete workflow. Additionally, you can provide a feature annotation file in the project configuration (e.g., for plotting gene symbols instead of ensembl terms). If in doubt read the comments in the config and/or try the default values.
 
-- project configuration (config/config.yaml): configures the analyses to be performed and is different for every project/dataset.
+- project configuration (`config/config.yaml`): configures the analyses to be performed and is different for every project/dataset.
 - annotation (annotation): CSV file consisting of 10 mandatory columns
     -  name: name of the dataset/analysis (tip: keep it short, but descriptive, distinctive and unique)
     -  data: Absolute path to the input data as CSV file as feature by sample table (eg RNA count matrix) that has already been quality controlled (eg bad samples removed) and filtered for relevant features (eg only expressed genes). The first column has to contain the features and the first row the sample-names.
@@ -15,6 +15,7 @@ You need one configuration file and one annotation file to run the complete work
     -  eBayes: Flag to indicate if eBayes function should be used (1) or not (0). Note: Skipping eBayes (0) will lead to the use of ordinary t-statistic with topTable and is [not recommended by the limma author Gordon Smyth](https://support.bioconductor.org/p/35174/), the B-statistics (log-odds) are still determined using eBayes, assuming they will not be used downstream. Make sure you know what you are doing.
     -  limma_trend: Flag to indicate if limma-trend should be used (1) (ie sets [limma::eBayes](https://www.rdocumentation.org/packages/limma/versions/3.28.14/topics/ebayes) parameter trend=TRUE), or not (0). Note: Make sure to activate the required eBayes function (=1) and deactivate voom (=0) if you use limma-trend. Using voom and limma-trend makes no sense, but is not forbiden by the workflow.
 
+Set workflow-specific `resources` or command line arguments (CLI) in the workflow profile `workflow/profiles/default.config.yaml`, which supersedes global Snakemake profiles.
 
 ## Common configuration scenarios
 - standard **limma-voom** workflow with raw counts as input data ([see "Differential expression: voom" in the limma userguide](http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf))

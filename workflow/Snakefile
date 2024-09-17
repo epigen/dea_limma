@@ -1,4 +1,7 @@
 
+##### global workflow dependencies #####
+conda: "envs/global.yaml"
+
 ##### libraries #####
 import os
 import sys
@@ -7,7 +10,7 @@ import yaml
 from snakemake.utils import min_version
 
 ##### set minimum snakemake version #####
-min_version("7.15.2")
+min_version("8.20.1")
 
 module_name = "dea_limma_fz"
 
@@ -71,8 +74,6 @@ rule all:
     threads: config.get("threads", 1)
     log:
         os.path.join("logs","rules","all.log"),
-    params:
-        partition=config.get("partition"),
 
         
 
