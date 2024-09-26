@@ -49,7 +49,7 @@ if (feature_list_name=="FILTERED"){
 # if no features in the results, end early with empty plot
 if(length(feature_list)==0){
     ggsave_new(filename = feature_list_name, 
-           results_path=dirname(lfc_heatmap_path), 
+           results_path=dirname(dea_lfc_heatmap_path), 
            plot = ggplot() + annotate("text", x = 0.5, y = 0.5, label = "Features not found in DEA results.") + theme_void(), 
            width=4, 
            height=1)
