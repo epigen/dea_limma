@@ -3,7 +3,7 @@
 You need one configuration file and one annotation file to run the complete workflow. Additionally, you can provide a feature annotation file in the project configuration (e.g., for plotting gene symbols instead of ensembl terms). If in doubt read the comments in the config and/or try the default values.
 
 - project configuration (`config/config.yaml`): configures the analyses to be performed and is different for every project/dataset.
-- annotation (annotation): CSV file consisting of 10 mandatory columns
+- annotation (annotation): CSV file with one row per analysis and consisting of 10 mandatory columns
     -  name: name of the dataset/analysis (tip: keep it short, but descriptive, distinctive and unique)
     -  data: Absolute path to the input data as CSV file as feature by sample table (eg RNA count matrix) that has already been quality controlled (eg bad samples removed) and filtered for relevant features (eg only expressed genes). The first column has to contain the features and the first row the sample-names.
     -  metadata: Absolute path to the metadata as CSV file for the required analysis (ie every variable in the formula and opyional blocking variable needs to have a corresponding column). The first column has to be the sample name. The metadata file has to be R compatible (eg column names should not start with a number or contain colons).
