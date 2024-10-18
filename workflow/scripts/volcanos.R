@@ -77,6 +77,7 @@ for (pval_type in c("adj.P.Val", "P.Value")){
             colAlpha <- keyvals.alpha
         }
 
+		type_label <- if(pval_type=='adj.P.Val') "adj. p-value" else "raw p-value"
         volcano_plot <- EnhancedVolcano(toptable = toptable,
                         lab = if (feature_list_name=="ALL") NA else if("feature_name" %in% colnames(toptable)) toptable$feature_name else toptable$feature,
                         x = x,
@@ -94,7 +95,7 @@ for (pval_type in c("adj.P.Val", "P.Value")){
                         subtitleLabSize = 0,
                         captionLabSize = 6,
                         pCutoff = pCutoff, #default: 0.05
-                        pCutoffCol = "adj.P.Val",
+                        pCutoffCol = pval_type, #"adj.P.Val",
                         FCcutoff = FCcutoff, # default:1
                         cutoffLineType = "longdash",
                         cutoffLineCol = "black",
@@ -114,7 +115,7 @@ for (pval_type in c("adj.P.Val", "P.Value")){
                         colGradientBreaks = c(pCutoff, 1),
                         colGradientLabels = c("0", "1.0"),
                         colGradientLimits = c(0, 1),
-                        legendLabels = c("NS", expression(~ log[2] ~ FC), "adj. p-value", 'both'),
+                        legendLabels = c("NS", expression(~ log[2] ~ FC), type_label, 'both'),
                         legendPosition = "right", #default: "top"
                         legendLabSize = 14,
                         legendIconSize = 4,
