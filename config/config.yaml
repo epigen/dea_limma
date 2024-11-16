@@ -1,6 +1,4 @@
 
-# alwayse use absolute paths
-
 ##### RESOURCES #####
 mem: '32000'
 threads: 1
