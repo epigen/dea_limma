@@ -120,6 +120,7 @@ if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
                                              ylab("number of differential features") +
                                              scale_fill_manual(values=list("down"="blue", "up"="red"), drop=FALSE) +
                                              scale_y_continuous(labels = function(y) sapply(y, function(y) ifelse(y < 0, paste0(sub("-", "", as.character(y))), y))) +
+                                             geom_text(aes(label=abs(n_features)), vjust=ifelse(plot_stats_df$n_features < 0, 1.5, -0.5), hjust=0.5, size=3) +
                                              custom_theme +
                                              theme(#legend.position = "none",
                                                    axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 6)
