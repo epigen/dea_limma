@@ -1,8 +1,6 @@
 #### load libraries & utility function 
 library("ggplot2")
-# library("patchwork")
 library("data.table")
-# library(reshape2)
 
 # source utility functions
 # source("workflow/scripts/utils.R")
@@ -34,7 +32,6 @@ if (!dir.exists(results_path)){
 }
 
 ### load DEA results
-# dea_results <- read.csv(file=file.path(dea_result_path))
 dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
 groups <- unique(dea_results$group)
 
@@ -54,14 +51,12 @@ if (score_formula!=""){
     
     for (group in groups){
         tmp_features <- dea_results[(dea_results$group==group),c("feature","score")]
-#         write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores.csv")), row.names=FALSE)
         fwrite(as.data.frame(tmp_features), file=file.path(results_path,paste0(group,"_featureScores.csv")), row.names=FALSE)
 
 
         if("feature_name" %in% colnames(dea_results)){
             tmp_features <- dea_results[(dea_results$group==group),c("feature_name","score")]
             tmp_features <- tmp_features[tmp_features$feature_name != "",]
-#             write.csv(tmp_features, file.path(results_path,paste0(group,"_featureScores_annot.csv")), row.names=FALSE)
             fwrite(as.data.frame(tmp_features), file=file.path(results_path,paste0(group,"_featureScores_annot.csv")), row.names=FALSE)
         }
     }
@@ -77,10 +72,13 @@ dea_filtered_results <- dea_results[(dea_results$adj.P.Val <= adj_pval) &
                                                                                           
 dea_filtered_stats <- table(dea_filtered_results$group, dea_filtered_results$direction)
 dea_filtered_stats_df <- as.data.frame.matrix(dea_filtered_stats)
-dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
 
-                                             
-# write.csv(dea_filtered_stats_df, file=file.path(dea_stats_path), row.names=TRUE)
+# Handling the exception when no significant genes are found in either up or down categories
+if (!all(c("up", "down") %in% colnames(dea_filtered_stats_df))) {
+    dea_filtered_stats_df[setdiff(c("up", "down"), colnames(dea_filtered_stats_df))] <- 0
+}
+
+dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
 fwrite(as.data.frame(dea_filtered_stats_df), file=file.path(dea_stats_path), row.names=TRUE)
 
 if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
@@ -105,20 +103,9 @@ if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
             }
         }
     }                                             
-
                                              
     ### visualize & save DEA statistics
     width_panel <- length(groups) * width + 2
-                                             
-    # dea_results_p <- ggplot(dea_filtered_results, aes(x=group, fill=direction)) + 
-    #                                              geom_bar() + 
-    #                                              xlab("groups") +
-    #                                              ylab("number of differential features") +
-    #                                              scale_y_continuous(limits = c(0, NA), expand = c(0, 0)) +
-    #                                              scale_x_discrete(label=addline_format) +
-    #                                              scale_fill_manual(values=list(up="red", down="blue"), drop=FALSE) +
-    #                                              custom_theme +
-    #                                              theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust=1, size = 6)) # rotates the x-Axis
 
     dea_filtered_stats_df$total <- NULL
     dea_filtered_stats_df[,"down"] <- -1 * dea_filtered_stats_df[,"down"]
@@ -158,16 +145,15 @@ if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
            height=1)
 }
                                              
-# plot P-value distribution as sanity check
-# pvalue_plots <- list()   
-                                                                                            
-
-                                             
+# plot P-value distribution as sanity check                                             
 for (group in unique(dea_results$group)){
     tmp_dea_results <- dea_results[dea_results$group==group, ]
 
-#     pvalue_plots[[group]] <-
-    pvalue_plot <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + geom_histogram(bins=100) + theme_bw(16) + ggtitle(addline_format(group)) + custom_theme
+    pvalue_plot <- ggplot(tmp_dea_results, aes(x=P.Value, fill=factor(round(AveExpr)))) + 
+        geom_histogram(bins=100) + 
+        theme_bw(16) + 
+        ggtitle(addline_format(group)) + 
+        custom_theme
     
     ggsave_new(filename = group,
                results_path=dea_pvalue_plot_path, 
@@ -177,23 +163,3 @@ for (group in unique(dea_results$group)){
               )
 
 }
-                                             
-# width <- 4
-# height <- 4
-
-# n_col <- min(10, length(unique(dea_results$group)))
-
-# width_panel <- n_col * width + 1
-# height_panel <- height * ceiling(length(unique(dea_results$group))/n_col)
-
-# pvalue_plots_panel <- wrap_plots(pvalue_plots, ncol = n_col, guides = "collect")
-
-# save plot
-# options(repr.plot.width=width_panel, repr.plot.height=height_panel)
-# print(pvalue_plots_panel)
-
-# ggsave_new(filename = "pvalue_distribution", 
-#            results_path=dirname(dea_stats_plot_path), 
-#            plot=pvalue_plots_panel, 
-#            width=width_panel, 
-#            height=height_panel)
