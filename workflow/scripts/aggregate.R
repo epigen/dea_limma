@@ -81,30 +81,27 @@ if (!all(c("up", "down") %in% colnames(dea_filtered_stats_df))) {
 dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
 fwrite(as.data.frame(dea_filtered_stats_df), file=file.path(dea_stats_path), row.names=TRUE)
 
-if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
-    ### save differential feature lists from filtered DEA results for downstream analysis (eg enrichment analysis)
-    for (group in unique(dea_filtered_results$group)){
-        for (direction in unique(dea_filtered_results$direction)){
-        
-            tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature"]
+### save differential feature lists from filtered DEA results for downstream analysis (eg enrichment analysis)
+for (group in groups){
+    for (direction in c("up", "down")){
+# for (group in unique(dea_filtered_results$group)){
+    # for (direction in unique(dea_filtered_results$direction)){
+        tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature"]
+        tmp_features <- unique(tmp_features)
+        write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features.txt")))
+
+        if("feature_name" %in% colnames(dea_results)){
+            tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature_name"]
+            tmp_features <- tmp_features[tmp_features != ""]
             tmp_features <- unique(tmp_features)
-            write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features.txt")))
+            write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features_annot.txt")))
         }
     }
+}
                                              
-    if("feature_name" %in% colnames(dea_results)){
-        for (group in unique(dea_filtered_results$group)){
-            for (direction in unique(dea_filtered_results$direction)){
-
-                tmp_features <- dea_filtered_results[(dea_filtered_results$group==group) & (dea_filtered_results$direction==direction),"feature_name"]
-                tmp_features <- tmp_features[tmp_features != ""]
-                tmp_features <- unique(tmp_features)
-                write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features_annot.txt")))
-            }
-        }
-    }                                             
-                                             
-    ### visualize & save DEA statistics
+if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
+    ### visualize DEA statistics
+    groups <- unique(dea_filtered_results$group)
     width_panel <- length(groups) * width + 2
 
     dea_filtered_stats_df$total <- NULL
@@ -120,7 +117,8 @@ if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
                                              ylab("number of differential features") +
                                              scale_fill_manual(values=list("down"="blue", "up"="red"), drop=FALSE) +
                                              scale_y_continuous(labels = function(y) sapply(y, function(y) ifelse(y < 0, paste0(sub("-", "", as.character(y))), y))) +
-                                             geom_text(aes(label=abs(n_features)), vjust=ifelse(plot_stats_df$n_features < 0, 1.5, -0.5), hjust=0.5, size=3) +
+                                             # geom_text(aes(label=abs(n_features), vjust=ifelse(n_features < 0, 1.5, -0.5), hjust=0.5), size=2) +
+                                             geom_text(aes(label=ifelse(n_features == 0, '', abs(n_features)), vjust=ifelse(n_features < 0, 1.5, -0.5), hjust=0.5), size=2) +
                                              custom_theme +
                                              theme(#legend.position = "none",
                                                    axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 6)
@@ -136,8 +134,7 @@ if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
            width=width_panel, 
            height=height)
                                              
-} else { # Then there are no filtered features.
-	# Write empty files for snakemakes benefit.
+} else { # If there are no filtered features.
 	# empty stats plot
 	ggsave_new(filename = "stats", 
            results_path=dirname(dea_stats_plot_path), 
