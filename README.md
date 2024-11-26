@@ -59,7 +59,7 @@ The workflow performs the following steps that produce the outlined results:
   - (optional) __block__ on a "group" factor in case you have repeated measurements (generalized least squares).
       - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
   - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit__.
-      - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts (see instructions below in [Usage](#usage)).
+      - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts (see instructions below in [Contrasts](#contrasts)).
   - (optional) estimate variance "better" using __eBayes__, with the robustness flag (robust=TRUE), by looking across all genes (i.e. shrunk towards a common value) and compute moderated t-statistics.
       - (optional) eBayes with __limma-trend__ (trend=TRUE)
   - extract all statistics for variables of interest (=configured comparisons) using __topTable__ (eg coefficients/effect size, statistical significance,...).
@@ -88,9 +88,9 @@ The workflow performs the following steps that produce the outlined results:
       - post-fitting mean-variance trend
       - raw p-value distributions (to check for p-value inflation in relation to average expression)
 
-Note
-- Colons (":") in variable/group names (i.e., interactions) are replaced with double-underscores ("\_\_") downstream.
-- We do not support more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses (see instructions below in [Usage](#usage)).
+> [!NOTE]  
+> - Colons (":") in variable/group names (i.e., interactions) are replaced with double-underscores ("\_\_") downstream.
+> - We do not support more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses (see instructions below in [Contrasts](#contrasts)).
 
 
 # 🛠️ Usage
@@ -99,18 +99,58 @@ Here are some tips for the usage of this workflow:
 - Perform your first run(s) with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
 - Test minimal complex configurations on a subset of your data.
 - Start with simple models and try to understand the results.
-- If you require contrasts to ask questions your model does not answer, just load the fitted model and perform the contrast manually (see examle in [_limma's_ User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf) chapter 9.5):
-  ```R
-  # load model
-  fit <- readRDS(file.path('{result_path}/dea_limma/{analysis}/lmfit_object.rds'))
-  # define and perform contrast (example from limma's User's Guide chapter 9.5.3)
-  fit2 <- contrasts.fit(fit, c(0,0,-1,1))
-  # estimate/correct variance with eBayes
-  fit2 <- eBayes(fit2)
-  # extract results
-  results <- topTable(fit2)
-  # process and visualize results as you wish, feel free to reuse code from this module
-  ```
+
+# ⚖️ Contrasts
+Currently, we do not support contrasts. If you have any idea how to implement contrasts, feel invited to reach out.
+If you require contrasts to ask questions your model does not answer, just load the fitted model and perform the contrast manually (see examle in [_limma's_ User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf) chapter 9.5):
+```R
+# load model and design
+fit <- readRDS(file.path('{result_path}/dea_limma/{analysis}/lmfit_object.rds'))
+design <- data.frame(fread(file.path("{result_path}/dea_limma/{analysis}/model_matrix.csv"), header=TRUE), row.names=1)
+
+# define and create contrasts of interest
+# e.g., if you modeled "~ 0 + group", where group = {celltype}_{genotype}
+# you can find the genotype effect for cell types A, B, C using the following contrasts
+contrasts_all <- list(
+                ctA = "groupCelltypeA_KO - groupCelltypeA_WT",
+                ctB = "groupCelltypeB_KO - groupCelltypeB_WT",
+                ctC = "groupCelltypeC_KO - groupCelltypeC_WT"
+                )
+contrast_matrix <- makeContrasts(contrasts=contrasts_all, levels = design)
+
+# perform contrasts
+fit2 <- contrasts.fit(fit, contrast_matrix)
+
+# estimate/correct variance with eBayes
+fit2 <- eBayes(fit2)
+
+# extract results
+contrast_result <- data.frame()
+
+for(coefx in colnames(coef(fit2))){
+    tmp_res <- topTable(fit2, coef=coefx, number=nrow(fit2), sort.by="P")
+    tmp_res$feature <- rownames(tmp_res)
+    tmp_res <- tmp_res[,c(ncol(tmp_res),1:(ncol(tmp_res)-1))]
+    rownames(tmp_res) <- NULL
+    
+    # beautify group names by replacing them (the contrast formula) with the names of the comparison
+    tmp_res$group <- names(contrasts_all)[contrasts_all == coefx]
+    
+    if(dim(contrast_result)[1]==0){
+        contrast_result <- tmp_res
+    }else{
+        contrast_result <- rbind(contrast_result, tmp_res)
+    }
+}
+
+# remove rows with adj.P.Val=NA
+contrast_result <- contrast_result[!is.na(contrast_result$adj.P.Val),]
+
+# save results
+fwrite(as.data.frame(contrast_result), file=file.path("path/to/contrast_results.csv"), row.names=FALSE)
+
+# process and visualize results as you wish, feel free to reuse code from this module
+```
 
 # ⚙️ Configuration
 Detailed specifications can be found here [./config/README.md](./config/README.md)

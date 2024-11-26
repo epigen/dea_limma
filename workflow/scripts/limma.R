@@ -217,5 +217,4 @@ for(coefx in colnames(coef(lmfit))){
 dea_results <- dea_results[!is.na(dea_results$adj.P.Val),]
 
 ### save DEA results
-# write.csv(dea_results, file=file.path(dea_result_path), row.names=FALSE)
 fwrite(as.data.frame(dea_results), file=file.path(dea_result_path), row.names=FALSE)
