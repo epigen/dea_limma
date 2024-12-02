@@ -27,11 +27,12 @@ rule dea:
         "../scripts/limma.R"
 
 # aggregate results per analysis
-checkpoint aggregate:
+rule aggregate:
     input:
         dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
         all_features = os.path.join(result_path,'{analysis}','feature_lists','ALL_features.txt'),
+        all_features_annot = os.path.join(result_path,'{analysis}','feature_lists','ALL_features_annot.txt') if config["feature_annotation"]["path"]!="" else [],
         feature_lists = directory(os.path.join(result_path,'{analysis}','feature_lists')),
         dea_stats = report(os.path.join(result_path,'{analysis}','stats.csv'), 
                                   caption="../report/dea_stats.rst", 
@@ -69,6 +70,7 @@ checkpoint aggregate:
     log:
         os.path.join("logs","rules","aggregate_{analysis}.log"),
     params:
+        group = "ALL",
         score_formula = config["score_formula"],
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
@@ -76,18 +78,30 @@ checkpoint aggregate:
     script:
         "../scripts/aggregate.R"
 
-# intermediate rule required for checkpoint usage with wildcards to aggregate all result feature lists
-rule gather_feature_lists:
+# generate feature lists per group
+# not part of target rule all and only used when the outputs are required by a subsequent module e.g., enrichment_analysis
+rule feature_lists:
     input:
-        get_feature_lists,
+        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
+        dea_stats = os.path.join(result_path,'{analysis}','stats.csv'), # this ensures rule order (after rule aggregate) to avoid file writing clashes
     output:
-        os.path.join(result_path, '{analysis}', 'result_feature_lists.txt'),
+        features_up = os.path.join(result_path,'{analysis}','feature_lists',"{group}_up_features.txt"),
+        features_up_annot = os.path.join(result_path,'{analysis}','feature_lists',"{group}_up_features_annot.txt") if config["feature_annotation"]["path"]!="" else [],
+        features_down = os.path.join(result_path,'{analysis}','feature_lists',"{group}_down_features.txt"),
+        features_down_annot = os.path.join(result_path,'{analysis}','feature_lists',"{group}_down_features_annot.txt") if config["feature_annotation"]["path"]!="" else [],
+        features_scores = os.path.join(result_path,'{analysis}','feature_lists',"{group}_featureScores.csv") if config["score_formula"]!="" else [],
+        features_scores_annot = os.path.join(result_path,'{analysis}','feature_lists',"{group}_featureScores_annot.csv") if (config["score_formula"]!="" and config["feature_annotation"]["path"]!="") else [],
     resources:
-        mem_mb="1000",
-    threads: 1
+        mem_mb=config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    conda:
+        "../envs/ggplot.yaml"
     log:
-        os.path.join("logs","rules","gather_feature_lists_{analysis}.log"),
-    shell:
-        """
-        echo '{input}' | tr ' ' '\n' > {output}
-        """
+        os.path.join("logs","rules","feature_lists_{analysis}_{group}.log"),
+    params:
+        group = lambda w: "{}".format(w.group),
+        assay = lambda w: annot_dict["{}".format(w.analysis)]["assay"],
+        metadata = lambda w: annot_dict["{}".format(w.analysis)]["metadata"],
+        control = lambda w: annot_dict["{}".format(w.analysis)]["control"],
+    script:
+        "../scripts/aggregate.R"

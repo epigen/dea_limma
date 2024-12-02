@@ -8,7 +8,7 @@ threads: 1
 # absolute path to annotation file, specified in config/README.md
 annotation: /path/to/DataSet_dea_limma_annotation.csv
 
-# (optional) absolute path to a feature annotation file with the first column as the used features (eg ENSEMBLE IDs) and "column" the annotated name (eg gene symbols). If not used leave empty "".
+# (optional) absolute path to a feature annotation file with the first column as the used features (eg ENSEMBLE IDs) and "column" the annotated name (eg gene symbols). If not used leave path empty "".
 feature_annotation:
     path: /path/to/feture_annotation.csv
     column: "alternative_feature_name"

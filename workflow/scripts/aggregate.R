@@ -16,6 +16,7 @@ dea_stats_plot_path <- snakemake@output[["dea_stats_plot"]]
 dea_pvalue_plot_path <- snakemake@output[["dea_pvalue_plot"]]
 
 # parameters
+group_flag <- snakemake@params[["group"]]
 adj_pval <- as.numeric(snakemake@params[["adj_pval"]]) # 0.05
 lfc <- as.numeric(snakemake@params[["lfc"]]) # 0
 ave_expr <- as.numeric(snakemake@params[["ave_expr"]]) # 0
@@ -33,7 +34,13 @@ if (!dir.exists(results_path)){
 
 ### load DEA results
 dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
-groups <- unique(dea_results$group)
+
+# set groups depending on rule used
+if (group_flag=="ALL"){
+    groups <- unique(dea_results$group)
+} else{
+    groups <- group_flag
+}
 
 ### save list of all expressed (and all significant features) for downstream analysis (eg as background in enrichment analyses)
 all_features <- unique(dea_results$feature)
@@ -79,7 +86,10 @@ if (!all(c("up", "down") %in% colnames(dea_filtered_stats_df))) {
 }
 
 dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
-fwrite(as.data.frame(dea_filtered_stats_df), file=file.path(dea_stats_path), row.names=TRUE)
+
+if (group_flag=="ALL"){
+    fwrite(as.data.frame(dea_filtered_stats_df), file=file.path(dea_stats_path), row.names=TRUE)
+}
 
 ### save differential feature lists from filtered DEA results for downstream analysis (eg enrichment analysis)
 for (group in groups){
@@ -97,6 +107,11 @@ for (group in groups){
             write(tmp_features, file.path(results_path,paste0(group,"_",direction,"_features_annot.txt")))
         }
     }
+}
+
+# quit early if rule feature_lists called aggregate.R
+if (group_flag!="ALL"){
+    quit(save = "no", status = 0)
 }
                                              
 if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
