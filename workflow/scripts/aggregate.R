@@ -27,7 +27,7 @@ width <- 0.25
 height <- 5
 
 # make result directory for feature lists if not exist
-results_path <- dirname(file.path(all_features_path))
+results_path <- file.path(file.path(dirname(dea_result_path)),"feature_lists")
 if (!dir.exists(results_path)){
     dir.create(results_path, recursive = TRUE)
 }
@@ -130,7 +130,7 @@ if (nrow(dea_filtered_stats) != 0) { # If there are DEA results after filtering
                                              geom_bar(stat="identity", position="identity") +
                                              xlab("groups") +
                                              ylab("number of differential features") +
-                                             scale_fill_manual(values=list("down"="blue", "up"="red"), drop=FALSE) +
+                                             scale_fill_manual(values=list("up"="red", "down"="blue"), drop=FALSE) +
                                              scale_y_continuous(labels = function(y) sapply(y, function(y) ifelse(y < 0, paste0(sub("-", "", as.character(y))), y))) +
                                              geom_text(aes(label=ifelse(n_features == 0, '', abs(n_features)), vjust=ifelse(n_features < 0, 1.5, -0.5), hjust=0.5), size=2) +
                                              custom_theme +

@@ -100,8 +100,9 @@ rule feature_lists:
         os.path.join("logs","rules","feature_lists_{analysis}_{group}.log"),
     params:
         group = lambda w: "{}".format(w.group),
-        assay = lambda w: annot_dict["{}".format(w.analysis)]["assay"],
-        metadata = lambda w: annot_dict["{}".format(w.analysis)]["metadata"],
-        control = lambda w: annot_dict["{}".format(w.analysis)]["control"],
+        score_formula = config["score_formula"],
+        adj_pval = config["filters"]["adj_pval"],
+        lfc = config["filters"]["lfc"],
+        ave_expr = config["filters"]["ave_expr"],
     script:
         "../scripts/aggregate.R"
