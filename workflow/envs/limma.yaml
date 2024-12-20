@@ -1,7 +1,7 @@
 channels:
   - conda-forge
   - bioconda
-  - defaults
+  - nodefaults
 dependencies:
   - bioconductor-limma=3.46.0
   - bioconductor-edger=3.32.1

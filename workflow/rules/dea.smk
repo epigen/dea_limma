@@ -75,6 +75,7 @@ rule aggregate:
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
         ave_expr = config["filters"]["ave_expr"],
+        utils_path=workflow.source_path("../scripts/utils.R"),
     script:
         "../scripts/aggregate.R"
 
@@ -104,5 +105,6 @@ rule feature_lists:
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
         ave_expr = config["filters"]["ave_expr"],
+        utils_path=workflow.source_path("../scripts/utils.R"),
     script:
         "../scripts/aggregate.R"

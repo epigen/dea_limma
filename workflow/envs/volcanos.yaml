@@ -1,7 +1,7 @@
 channels:
   - conda-forge
   - bioconda
-  - defaults
+  - nodefaults
 dependencies:
   - bioconductor-enhancedvolcano=1.20.0
   - r-ggplot2=3.5.1
