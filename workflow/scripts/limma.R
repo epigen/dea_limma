@@ -11,6 +11,7 @@ metadata_path <- snakemake@input[[2]]
 # outputs
 dea_result_path <- snakemake@output[["dea_results"]]
 lmfit_object_path <- snakemake@output[["lmfit_object"]]
+model_matrix_path <- snakemake@output[["model_matrix"]]
 
 # parameters
 feature_annotation <- snakemake@params[["feature_annotation"]]
@@ -94,7 +95,7 @@ for(col in names(reference_levels)){
 model_matrix <- model.matrix(design, metadata)
 # save model matrix
 # write.csv(model_matrix, file=file.path(result_dir,"model_matrix.csv"))
-fwrite(as.data.frame(model_matrix), file=file.path(result_dir,"model_matrix.csv"), row.names=TRUE)
+fwrite(as.data.frame(model_matrix), file=file.path(model_matrix_path), row.names=TRUE)
 
 # check if the model represented by the design matrix has full rank ie linearly independent columns, which is required to make the model identifiable!
 # new: more efficient and computationally stable compared to the svd() function, especially for large matrices, and it does not require rounding the singular values or checking for non-zero values.
