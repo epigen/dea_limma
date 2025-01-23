@@ -83,7 +83,13 @@ dea_filtered_stats_df <- as.data.frame.matrix(dea_filtered_stats)
 
 # Handling the exception when no significant genes are found in either up or down categories
 if (!all(c("up", "down") %in% colnames(dea_filtered_stats_df))) {
-    dea_filtered_stats_df[setdiff(c("up", "down"), colnames(dea_filtered_stats_df))] <- 0
+    missing_cols <- setdiff(c("up", "down"), colnames(dea_filtered_stats_df))
+    if (length(missing_cols) == 2) {
+        # just make a new dataframe, otherwise index fails completely
+        dea_filtered_stats_df <- data.frame(up=0, down=0)
+    } else {
+        dea_filtered_stats_df[missing_cols] <- 0
+    }
 }
 
 dea_filtered_stats_df$total <- rowSums(dea_filtered_stats_df)
