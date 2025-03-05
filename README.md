@@ -60,7 +60,7 @@ The workflow performs the following steps that produce the outlined results:
       - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
   - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit__.
       - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts (see instructions below in [Contrasts](#contrasts)).
-  - (optional) estimate variance "better" using __eBayes__, with the robustness flag (robust=TRUE), by looking across all genes (i.e. shrunk towards a common value) and compute moderated t-statistics.
+  - (optional) improve variance estimation using __eBayes__ with the robustness flag (`robust=TRUE`), which applies a robust empirical Bayes approach that downweights extreme variance estimates via winsorization, stabilizing hyperparameters across all genes (i.e., shrinking them toward a common value) and yielding moderated t-statistics and p-values that are more reliable in heterogeneous datasets.
       - (optional) eBayes with __limma-trend__ (trend=TRUE)
   - extract all statistics for variables of interest (=configured comparisons) using __topTable__ (eg coefficients/effect size, statistical significance,...).
   - save a feature list per comparison group and direction of change (up/down) for downstream analyses (eg enrichment analysis) (TXT).
@@ -122,7 +122,7 @@ contrast_matrix <- makeContrasts(contrasts=contrasts_all, levels = design)
 fit2 <- contrasts.fit(fit, contrast_matrix)
 
 # estimate/correct variance with eBayes
-fit2 <- eBayes(fit2)
+fit2 <- eBayes(fit2, robust=TRUE)
 
 # extract results
 contrast_result <- data.frame()
