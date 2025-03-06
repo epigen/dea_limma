@@ -70,8 +70,8 @@ rownames(adjp_df) <- adjp_df$feature
 adjp_df$feature <- NULL
 
 # subset dataframes according to feature list
-lfc_df <- lfc_df[feature_list, ]
-adjp_df <- adjp_df[feature_list, ]
+lfc_df <- lfc_df[feature_list, ,drop = FALSE]
+adjp_df <- adjp_df[feature_list, ,drop = FALSE]
 
 # set NA values to 0 (NA because below LFC threshold during testing or filtering)
 lfc_df[is.na(lfc_df)] <- 0
