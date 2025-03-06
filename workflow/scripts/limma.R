@@ -99,8 +99,9 @@ fwrite(as.data.frame(model_matrix), file=file.path(model_matrix_path), row.names
 
 # check if the model represented by the design matrix has full rank ie linearly independent columns, which is required to make the model identifiable!
 # new: more efficient and computationally stable compared to the svd() function, especially for large matrices, and it does not require rounding the singular values or checking for non-zero values.
-if(qr(model_matrix)$rank != ncol(model_matrix)){
-    stop("Error: The design matrix representing your model does not have full rank, rendering the model not identifiable.")
+# if(qr(model_matrix)$rank != ncol(model_matrix)){ # previous way of checking
+if(!is.fullrank(model_matrix)){
+    stop(paste0("Error: The design matrix representing your model does not have full rank, rendering the model not identifiable. The following columns are linearly dependent on previous columns: ", nonEstimable(model_matrix)))
 }
 # old: checks if all the singular values in the SVD decomposition of the model_matrix are non-zero, indicating that the matrix is full rank and invertible.
 # stopifnot(all(round(svd(model_matrix)$d, 6) != 0))
