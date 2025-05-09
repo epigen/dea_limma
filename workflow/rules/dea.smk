@@ -4,16 +4,17 @@ rule dea:
     input:
         get_paths
     output:
-        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
-        lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
-        model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
+        # using wildcard constraints for {analysis} with regex that excludes the substring "_OvA_"
+        dea_results = os.path.join(result_path,'{analysis,/^(?!.*_OvA_).*$/}','results.csv'),
+        lmfit_object = os.path.join(result_path,'{analysis,/^(?!.*_OvA_).*$/}','lmfit_object.rds'),
+        model_matrix = os.path.join(result_path,'{analysis,/^(?!.*_OvA_).*$/}','model_matrix.csv'),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
     conda:
         "../envs/limma.yaml"
     log:
-        os.path.join("logs","rules","dea_{analysis}.log"),
+        os.path.join("logs","rules","dea_{analysis,/^(?!.*_OvA_).*$/}.log"),
     params:
         feature_annotation = config["feature_annotation"],
         reference_levels = config["reference_levels"],
@@ -26,6 +27,27 @@ rule dea:
         limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],
     script:
         "../scripts/limma.R"
+
+# performs a one-vs-all (OvA) differential analysis using contrasts based on the previous model
+rule one_vs_all_contrasts:
+    input:
+        lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
+        model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
+        feature_annotation = config["feature_annotation"]["path"] if config["feature_annotation"]["path"]!="" else [],
+    output:
+        contrast_results = os.path.join(result_path,'{analysis}_OvA_{ova_var}','results.csv'),
+    params:
+        eBayes = lambda w: annot_dict["{}".format(w.analysis)]["eBayes"],
+        limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],
+    resources:
+        mem_mb=config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    conda:
+        "../envs/limma.yaml"
+    log:
+        os.path.join("logs","rules","one_vs_all_contrasts_{analysis}_{ova_var}.log"),
+    script:
+        "../scripts/one_vs_all_contrasts.R"
 
 # aggregate results per analysis
 rule aggregate:
@@ -80,32 +102,20 @@ rule aggregate:
     script:
         "../scripts/aggregate.R"
 
-# generate feature lists per group
-# not part of target rule all and only used when the outputs are required by a subsequent module e.g., enrichment_analysis
-rule feature_lists:
+
+# shadow rule to enable downstream processing
+# requires to know that the file will exist in that exact location, otherwise MissingInputException error
+rule fetch_file:
     input:
-        dea_results = os.path.join(result_path,'{analysis}','results.csv'),
-        dea_stats = os.path.join(result_path,'{analysis}','stats.csv'), # this ensures rule order (after rule aggregate) to avoid file writing clashes
+        dea_stats = os.path.join(result_path,'{analysis}','stats.csv'),
     output:
-        features_up = os.path.join(result_path,'{analysis}','feature_lists',"{group}_up_features.txt"),
-        features_up_annot = os.path.join(result_path,'{analysis}','feature_lists',"{group}_up_features_annot.txt") if config["feature_annotation"]["path"]!="" else [],
-        features_down = os.path.join(result_path,'{analysis}','feature_lists',"{group}_down_features.txt"),
-        features_down_annot = os.path.join(result_path,'{analysis}','feature_lists',"{group}_down_features_annot.txt") if config["feature_annotation"]["path"]!="" else [],
-        features_scores = os.path.join(result_path,'{analysis}','feature_lists',"{group}_featureScores.csv") if config["score_formula"]!="" else [],
-        features_scores_annot = os.path.join(result_path,'{analysis}','feature_lists',"{group}_featureScores_annot.csv") if (config["score_formula"]!="" and config["feature_annotation"]["path"]!="") else [],
+        feature_list = update(os.path.join(result_path,'{analysis}','feature_lists',"{group}_{type,(up_features.txt|up_features_annot.txt|down_features.txt|down_features_annot.txt|featureScores.csv|featureScores_annot.csv)}")),
     resources:
-        mem_mb=config.get("mem", "16000"),
-    threads: config.get("threads", 1)
-    conda:
-        "../envs/ggplot.yaml"
-    log:
-        os.path.join("logs","rules","feature_lists_{analysis}_{group}.log"),
-    params:
-        group = lambda w: "{}".format(w.group),
-        score_formula = config["score_formula"],
-        adj_pval = config["filters"]["adj_pval"],
-        lfc = config["filters"]["lfc"],
-        ave_expr = config["filters"]["ave_expr"],
-        utils_path=workflow.source_path("../scripts/utils.R"),
-    script:
-        "../scripts/aggregate.R"
+        mem_mb="1000",
+    shell:
+        """
+        # only if the file already exists
+        if [ -f {output.feature_list} ]; then \
+            touch {output.feature_list}; \
+        fi
+        """

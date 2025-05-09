@@ -43,6 +43,8 @@ This is a template for the Methods section of a scientific publication and is in
 
 __Differential Expression Analysis (DEA).__ DEA was performed on the quality-controlled filtered [raw/normalized] counts using the _limma_ (ver) [ref] workflow for fitting a linear model [formula] to identify features (genes/regions) that statistically significantly change with [comparisons] compared to the control group [reference levels] (intercept). Briefly, we determined normalization factors with edgeR::calcNormFactors (optional) using method [X], then applied voom (optional) to estimate the mean-variance relationship of the log-counts. We used blocking on (optional) variable [X] to account for repeated measurements, lmFit to fit the model to the data, and finally eBayes (optional) with the robust (and trend flag – optional for normalized data) flag to compute (moderated/ordinary) t-statistics. For each comparison we used topTable to extract feature-wise average expression, effect sizes (log2 fold change) and their statistical significance as adjusted p-values, determined using the Benjamini-Hochberg method. Furthermore, we calculated feature scores, for each feature in all comparisons, using the formula [score_formula] for downstream ranked enrichment analyses. Next, these results were filtered for relevant features based on the following criteria: statistical significance (adjusted p-value < [X]), effect size (absolute log2 fold change > [X]), and expression (average expression > [X]). Finally, we performed hierarchical clustering on the effect sizes (log2 fold changes) of the union of all relevant features and comparison groups.
 
+__One-vs-All (Ova) DEA (optional).__ To identify group-specific signatures, we performed one-vs-all analyses, where each group is compared against all others combined to identify uniquely regulated features relative to the rest. [all other downstream steps can be taken from above]
+
 __Visualization.__ The filtered result statistics, i.e., number of relevant features split by positive (up) and negative (down) effect sizes, were visualized with stacked bar plots using ggplot (ver) [ref].
 To visually summarize results of all performed comparisons, the effect size (log2 fold change) values of all relevant features in at least one comparison were plotted in a hierarchically clustered heatmap using pheatmap (ver) [ref]. 
 Volcano plots were generated for each comparison using EnhancedVolcano (ver) [ref] with adjusted p-value threshold of [pCutoff] and log2 fold change threshold of [FCcutoff] as visual cut-offs for the y- and x-axis, respectively.
@@ -67,11 +69,12 @@ The workflow performs the following steps that produce the outlined results:
     - (optional) annotated feature list with suffix "_annot" (TXT).
   - (optional) save feature score tables (with two columns: "feature" and "score") per comparison group using score_formula for downstream analyses (eg ranked enrichment analysis) (CSV).
     - (optional) annotated feature scores tables (with two columns: "feature_name" and "score") with suffix "_annot" (CSV).
+  - (optional) One-vs-all (OvA) analysis on modeled and specified covariates using contrasts, enabling automated comparison of each group against all others (e.g., cell types). 
 - DEA result statistics: total number of statistically significant features and split by positive (up) and negative (down) change (CSV).
-- DEA result filtering of features (eg genes) by 
-  - statistical significance (<= adjusted p-value: adj_pval)
-  - effect size (>= absolute log 2 fold change: lfc)
-  - average expression (>= ave_expr) in the data (to skip this filter use `-Inf`)
+- DEA result filtering of features (e.g., genes) by 
+  - statistical significance (<= adjusted p-value: `adj_pval`)
+  - effect size (>= absolute log 2 fold change: `lfc`)
+  - average expression (>= `ave_expr`) in the data (to skip this filter use `-Inf`)
 - Visualizations
   - filtered DEA result statistics ie number of features and direction (stacked bar plots)
   - volanco plots per comparison with effect size on the x-axis and raw p-value(rawp)/adjusted p-value (adjp) on the y-axis
@@ -89,8 +92,8 @@ The workflow performs the following steps that produce the outlined results:
       - raw p-value distributions (to check for p-value inflation in relation to average expression)
 
 > [!NOTE]  
-> - Colons (":") in variable/group names (i.e., interactions) are replaced with double-underscores ("\_\_") downstream.
-> - We do not support more complex contrast scenarios than are supported via topTable, but the fitted linear model is saved for downstream analyses (see instructions below in [Contrasts](#contrasts)).
+> - Colons (`:`) in variable/group names (i.e., interactions) are replaced with double-underscores (`__`) downstream.
+> - We do not support more complex contrast scenarios than are supported via topTable or one-vs-all analyses, but the fitted linear model is saved for downstream analyses (see instructions below in [Contrasts](#contrasts)).
 
 
 # 🛠️ Usage
@@ -121,8 +124,8 @@ contrast_matrix <- makeContrasts(contrasts=contrasts_all, levels = design)
 # perform contrasts
 fit2 <- contrasts.fit(fit, contrast_matrix)
 
-# estimate/correct variance with eBayes
-fit2 <- eBayes(fit2, robust=TRUE)
+# estimate/correct variance with eBayes and limma-trend (both optional)
+fit2 <- eBayes(fit2, robust=TRUE, trend=FALSE)
 
 # extract results
 contrast_result <- data.frame()
@@ -156,7 +159,9 @@ fwrite(as.data.frame(contrast_result), file=file.path("path/to/contrast_results.
 Detailed specifications can be found here [./config/README.md](./config/README.md)
 
 # 📖 Examples
---- COMING SOON ---
+Explore detailed examples showcasing module usage in comprehensive end-to-end analyses (including data, configuration, annotation and results) in our [MrBiomics Recipes](https://github.com/epigen/MrBiomics?tab=readme-ov-file#-recipes):
+- [ATAC-seq Analysis Recipe](https://github.com/epigen/MrBiomics/wiki/ATACseq-Analysis-Recipe)
+- [RNA-seq Analysis Recipe](https://github.com/epigen/MrBiomics/wiki/RNAseq-Analysis-Recipe)
 
 # 🔗 Links
 - [GitHub Repository](https://github.com/epigen/dea_limma/)
@@ -167,6 +172,8 @@ Detailed specifications can be found here [./config/README.md](./config/README.m
 # 📚 Resources
 - Recommended compatible [MrBiomics](https://github.com/epigen/MrBiomics) modules 
   - for upstream analyses:
+    - [Fetch Public Sequencing Data and Metadata Using iSeq](https://github.com/epigen/fetch_ngs/) to retrieve and prepare public NGS data for downstream processing.
+    - [RNA-seq Data Processing, Quantification & Annotation Pipeline](https://github.com/epigen/rnaseq_pipeline) for processing, quantification and annotation of gene expression.
     - [ATAC-seq Processing](https://github.com/epigen/atacseq_pipeline) to quantify chromatin accessibility.
     - [scRNA-seq Data Processing & Visualization](https://github.com/epigen/scrnaseq_processing_seurat) for processing (multimodal) single-cell transcriptome data.
     - [<ins>Sp</ins>lit, F<ins>ilter</ins>, Norma<ins>lize</ins> and <ins>Integrate</ins> Sequencing Data](https://github.com/epigen/spilterlize_integrate/) after count quantification.
