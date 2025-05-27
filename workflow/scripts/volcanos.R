@@ -26,8 +26,15 @@ width <- 5
 height <- 4
 
 ### load DEA results
-# dea_results <- read.csv(file=file.path(dea_result_path))
 dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
+
+# quit early and create empty result files, if there are no results
+if(nrow(dea_results)==0){
+    for (path in unlist(snakemake@output)) {
+        dir.create(path, recursive=TRUE, showWarnings=FALSE)
+    }
+    quit(save = "no", status = 0)
+}
 
 # load feature list if not ALL
 if (feature_list_name!="ALL"){

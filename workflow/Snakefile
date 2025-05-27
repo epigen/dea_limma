@@ -22,14 +22,15 @@ configfile: os.path.join("config", "config.yaml")
 
 # load annotation
 annot = pd.read_csv(config['annotation'], index_col='name')
+std_analyses = list(annot.index)
 # check if OvA columns exists and returns non-empty indices with postfix "_OvA"
-ova_indices = [
+ova_analyses = [
     f"{idx}_OvA_{val}"
     for idx, cell in annot.get('OvA', pd.Series('', index=annot.index)).fillna('').loc[lambda s: s!=''].items()
     for val in cell.split('|')
 ]
-# create list of analyses
-analyses = list(annot.index) + ova_indices
+# create list of all analyses
+analyses = std_analyses + ova_analyses
 
 # convert dictionary for parametrization of rules
 annot_dict = annot.to_dict('index')
@@ -44,12 +45,6 @@ if feature_lists_dict is not None:
 
 result_path = os.path.join(config["result_path"], module_name)
 
-
-# global wildcard constrain to make ruleorder directive obsolete
-# wildcard_constraints:
-#     analysis="/^(?!.*_OvA$).+$/" # regex excludes the substring "_OvA" at the end
-
-
 ##### target rule #####
 rule all:
     input:
@@ -57,7 +52,10 @@ rule all:
                             analysis = analyses,
                            ),
         # lmfit_objects = expand(os.path.join(result_path,'{analysis}','lmfit_object.rds'),
-        #                     analysis = analyses,
+        #                     analysis = std_analyses,
+        #                    ),
+        # model_matrices = expand(os.path.join(result_path,'{analysis}','model_matrix.csv'),
+        #                     analysis = std_analyses,
         #                    ),
         volcanos = expand(os.path.join(result_path,'{analysis}','plots','volcano','{feature_list}'),
                           analysis = analyses,

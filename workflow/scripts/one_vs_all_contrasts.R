@@ -10,10 +10,12 @@ feature_annotation_path <- snakemake@input[["feature_annotation"]]
 
 # output
 contrast_result_path <- snakemake@output[["contrast_results"]]
+contrast_object_path <- snakemake@output[["contrast_object"]]
+contrast_matrix_path <- snakemake@output[["contrast_matrix"]]
 
 # parameters
 ova_var <- snakemake@wildcards[["ova_var"]]
-feature_annotation_col <- base::make.names(snakemake@config[["feature_annotation"]][["column"]])[1]
+feature_annotation_col <- base::make.names(snakemake@params[["feature_annotation_col"]])[1]
 eBayes_flag <- snakemake@params[["eBayes"]] #1
 limma_trend <- snakemake@params[["limma_trend"]] #0
 
@@ -46,9 +48,13 @@ for (gr in groups){
 
 # generate contrast matrix based on contrast formulas and design matrix
 contrast_matrix <- makeContrasts(contrasts=contrasts_all, levels = design)
+# save contrast matrix
+fwrite(as.data.frame(contrast_matrix), file=file.path(contrast_matrix_path), row.names=TRUE)
 
 #### fit contrasts
 fit2 <- contrasts.fit(fit, contrast_matrix)
+# save fitted model object for manual downstream analyses
+saveRDS(fit2, file = file.path(contrast_object_path))
 
 # estimate/correct variance with eBayes (optional) without or with limma-trend (optional)
 # fit2 <- eBayes(fit2)

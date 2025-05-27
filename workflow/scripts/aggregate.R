@@ -36,6 +36,22 @@ if (!dir.exists(results_path)){
 ### load DEA results
 dea_results <- data.frame(fread(file.path(dea_result_path), header=TRUE))
 
+# quit early and create empty result files and folders, if there are no results
+if(nrow(dea_results)==0){
+    # loop only over named entries (i.e., non-empty names)
+    for (name in names(snakemake@output[nzchar(names(snakemake@output))])) {
+        path <- as.character(snakemake@output[[name]])
+        # skip file creation for directories
+        if (name %in% c("dea_pvalue_plot", "feature_lists")) {
+            dir.create(path, recursive=TRUE, showWarnings=FALSE)
+        }else{
+            dir.create(dirname(path), recursive=TRUE, showWarnings=FALSE)
+            file.create(path, showWarnings = FALSE)
+            }
+    }
+    quit(save = "no", status = 0)
+}
+
 # set groups depending on rule used
 if (group_flag=="ALL"){
     groups <- unique(dea_results$group)

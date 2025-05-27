@@ -7,6 +7,7 @@ library("data.table")
 # inputs
 data_path <- snakemake@input[[1]]
 metadata_path <- snakemake@input[[2]]
+feature_annotation_path <- snakemake@input[["feature_annotation"]]
 
 # outputs
 dea_result_path <- snakemake@output[["dea_results"]]
@@ -14,10 +15,7 @@ lmfit_object_path <- snakemake@output[["lmfit_object"]]
 model_matrix_path <- snakemake@output[["model_matrix"]]
 
 # parameters
-feature_annotation <- snakemake@params[["feature_annotation"]]
-feature_annotation[["path"]] <- file.path(feature_annotation[["path"]]) # make path
-feature_annotation[["column"]] <- base::make.names(feature_annotation[["column"]])[1] # make R compatible column name
-
+feature_annotation_col <- base::make.names(snakemake@params[["feature_annotation_col"]])[1] # make R compatible column name
 reference_levels <- snakemake@params[["reference_levels"]] #list(treatment="UT", time="0h")
 design <- formula(snakemake@params[["formula"]]) #formula("~ treatment")
 block_var <- snakemake@params[["block_var"]] #0
@@ -46,8 +44,8 @@ print("metadata")
 print(dim(metadata))
 
 ### load feature annotation file (optional)
-if (feature_annotation[["path"]]!=""){
-    feature_annot <- data.frame(fread(file.path(feature_annotation[["path"]]), header=TRUE), row.names=1)
+if (feature_annotation_path!=""){
+    feature_annot <- data.frame(fread(file.path(feature_annotation_path), header=TRUE), row.names=1)
     print("feature_annot")
     print(dim(feature_annot))
 }
@@ -91,7 +89,6 @@ for(col in names(reference_levels)){
 # create model matrix
 model_matrix <- model.matrix(design, metadata)
 # save model matrix
-# write.csv(model_matrix, file=file.path(result_dir,"model_matrix.csv"))
 fwrite(as.data.frame(model_matrix), file=file.path(model_matrix_path), row.names=TRUE)
 
 # check if the model represented by the design matrix has full rank ie linearly independent columns, which is required to make the model identifiable!
@@ -200,8 +197,8 @@ for(coefx in colnames(coef(lmfit))){
         rownames(tmp_res) <- NULL
         tmp_res$group <- gsub(":", "__", coefx) # replace colon with double-underscore
         
-        if (feature_annotation[["path"]]!=""){
-            tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation[["column"]]]
+        if (feature_annotation_path!=""){
+            tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation_col]
         }
     
         if(dim(dea_results)[1]==0){
