@@ -33,6 +33,7 @@ rule dea:
 # performs a one-vs-all (OvA) differential analysis using contrasts based on the previous model
 rule one_vs_all_contrasts:
     input:
+        metadata = get_metadata_path,
         lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
         model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
         feature_annotation = config["feature_annotation"]["path"] if config["feature_annotation"]["path"]!="" else [],

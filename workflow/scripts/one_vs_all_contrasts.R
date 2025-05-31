@@ -7,6 +7,7 @@ library("data.table")
 lmfit_object_path <- snakemake@input[["lmfit_object"]]
 model_matrix_path <- snakemake@input[["model_matrix"]]
 feature_annotation_path <- snakemake@input[["feature_annotation"]]
+metadata_path <- snakemake@input[["metadata"]]
 
 # output
 contrast_result_path <- snakemake@output[["contrast_results"]]
@@ -30,20 +31,42 @@ if (feature_annotation_path!=""){
     print(dim(feature_annot))
 }
 
-#### identify groups for one-vs-all contrasts using column prefix & design matrix
-groups <- colnames(design)[startsWith(colnames(design), ova_var)]
+#### identify groups for one-vs-all contrasts using the metadata table, column prefix & design matrix
+meta <- data.frame(fread(file.path(metadata_path), header=TRUE), row.names=1)
+if (grepl(':', ova_var)){
+    # for interaction terms, need to generate all combinations of the levels
+    # there could be multiple colons in the variable name for high-order interaction terms
+    ova_vars <- unlist(strsplit(ova_var, ':'))
+    individual_group_levels <- lapply(ova_vars, function(var) {
+        unique(meta[, var])
+    })
+    # get combinations of all group levels
+    level_combinations <- expand.grid(individual_group_levels, stringsAsFactors = FALSE)
+    group_names <- apply(level_combinations, 1, function(row) {
+        paste(row, collapse = ":")
+    })
+    ## add prefix to match the design matrix
+    group_cols <- apply(level_combinations, 1, function(row) {
+        paste0(ova_vars, row, collapse = ":")
+    })
+} else {
+    group_names <- unique(meta[,ova_var])
+    # add prefix to match the design matrix
+    group_cols <- paste0(ova_var, group_names)
+}
 
 #### define contrasts
 contrasts_all <- list()
 
-for (gr in groups){
-    # remove prefix
-    gr_name <- gsub(ova_var, "", gr)
-    # list of all groups without current group gr
-    groups_wo_gr <- groups[groups != gr]
+for (i in seq(length(group_names))){
+    group_name <- group_names[[i]]
+    group_col <- group_cols[[i]]
+    
+    # list of all group_cols without current group group_col
+    group_cols_wo_gr <- group_cols[group_cols != group_col]
     # define contrast for one-vs-all analysis
-    contrasts_all[[gr_name]] <- paste0(gr, " - (", paste(groups_wo_gr, collapse=" + "), ") / ", length(groups_wo_gr))
-    print(contrasts_all[[gr_name]])
+    contrasts_all[[group_name]] <- paste0(group_col, " - (", paste(group_cols_wo_gr, collapse=" + "), ") / ", length(group_cols_wo_gr))
+    print(contrasts_all[[group_name]])
 }
 
 # generate contrast matrix based on contrast formulas and design matrix
