@@ -19,10 +19,14 @@ ova_var <- snakemake@wildcards[["ova_var"]]
 feature_annotation_col <- base::make.names(snakemake@params[["feature_annotation_col"]])[1]
 eBayes_flag <- snakemake@params[["eBayes"]] #1
 limma_trend <- snakemake@params[["limma_trend"]] #0
+formula <- snakemake@params[["formula"]]
 
 #### load data (model, design and feature_annotation)
 fit <- readRDS(lmfit_object_path)
 design <- data.frame(fread(file.path(model_matrix_path), header=TRUE), row.names=1)
+
+# FIXME this is not correct for means models
+intercept_col = colnames(design)[1] 
 
 ### load feature annotation file (optional)
 if (feature_annotation_path!=""){
@@ -31,9 +35,17 @@ if (feature_annotation_path!=""){
     print(dim(feature_annot))
 }
 
+is_interaction <- grepl(":", ova_var, fixed=TRUE)
+
 #### identify groups for one-vs-all contrasts using the metadata table, column prefix & design matrix
 meta <- data.frame(fread(file.path(metadata_path), header=TRUE), row.names=1)
-if (grepl(':', ova_var)){
+# check if ova_var is numeric, and if yes, cause error since OvA does not make sense for continuous variables
+# ok to kill the process, since the user should not get to make this wrong choice
+if (!is_interaction && is.numeric(meta[, ova_var])){
+    stop(paste0("One-vs-all contrasts do not make sense for numeric (non-factor) variable '", ova_var))
+}
+
+if (is_interaction){
     # for interaction terms, need to generate all combinations of the levels
     # there could be multiple colons in the variable name for high-order interaction terms
     ova_vars <- unlist(strsplit(ova_var, ':'))
@@ -42,31 +54,128 @@ if (grepl(':', ova_var)){
     })
     # get combinations of all group levels
     level_combinations <- expand.grid(individual_group_levels, stringsAsFactors = FALSE)
+    # the design matrix is saved with : in the column names for interaction terms, but fread replaces them with .
+    # this is based on the make.names() function, so use it here as well to make exactly the same names
     group_names <- apply(level_combinations, 1, function(row) {
-        paste(row, collapse = ":")
+        make.names(paste(row, collapse = ":"))
     })
-    ## add prefix to match the design matrix
+    # add prefix to match the design matrix, and use make.names to ensure valid R names (mirror automatic behavi)
     group_cols <- apply(level_combinations, 1, function(row) {
-        paste0(ova_vars, row, collapse = ":")
+        make.names(paste0(ova_vars, row, collapse = ":"))
     })
 } else {
-    group_names <- unique(meta[,ova_var])
-    # add prefix to match the design matrix
-    group_cols <- paste0(ova_var, group_names)
+    group_names <- make.names(unique(meta[,ova_var]))
+    group_cols <- make.names(paste0(ova_var, group_names))
 }
+
+# cannot just load the ref group since giving reference levels is optional
+reference_group <- setdiff(group_cols, colnames(design))
+if (!is_interaction && length(reference_group) != 1) {
+    # something went wrong
+    stop("There should be exactly one reference group in the design matrix.")
+} else if (is_interaction) {
+    print("For interactions, reference groups will be determined based on colums in the design matrix.")
+} else {
+    reference_group <- reference_group[1]
+    print(paste0("Reference group: ", reference_group))
+}
+
+# find out if there is a term that was modelled as a means model and if yes, which metadata column that was
+# i.e., which is the first non-interaction term in the formula
+is_means_model <- grepl("~*0", formula)
+all_terms <- unlist(strsplit(formula, "\\+")) 
+means_model_term <- FALSE
+if (is_means_model){    
+    for (i in 2:length(all_terms)){
+        term <- all_terms[i]
+        if (grepl(":", term, fixed=TRUE)){
+            # interaction term, skip
+            next
+        }
+        means_model_term <- gsub(" ", "", term)
+        break
+    }
+}
+print(paste0("Means model term: ", means_model_term))
+# is the current OvA terms is the one that's modelled as a means model
+ova_for_means_model <- ova_var == means_model_term
 
 #### define contrasts
 contrasts_all <- list()
-
 for (i in seq(length(group_names))){
+
     group_name <- group_names[[i]]
     group_col <- group_cols[[i]]
-    
-    # list of all group_cols without current group group_col
     group_cols_wo_gr <- group_cols[group_cols != group_col]
-    # define contrast for one-vs-all analysis
-    contrasts_all[[group_name]] <- paste0(group_col, " - (", paste(group_cols_wo_gr, collapse=" + "), ") / ", length(group_cols_wo_gr))
+
+    # see https://github.com/epigen/dea_limma/issues/34 for a visual explanation of what is happening here
+    if (ova_for_means_model){
+        # for a means model, simply subtract the mean of all other groups from the current group
+        contrasts_all[[group_name]] <- paste0(
+            group_col, " - (", paste(group_cols_wo_gr, collapse=" + "), ") / ", length(group_cols_wo_gr)
+        )
+        
+    } else if (is_interaction) {
+        # if the current OvA term is an interaction, need to find all the columns that contribute to a group, i.e., 
+        # the main effects and the interaction effect, and sum them up to the get actual effect to compare
+        # depending on the model, different main effects will be in design matrix or be represented by the intercept
+        main_effects <- strsplit(group_col, ".", fixed=TRUE)[[1]]
+        main_effects <- main_effects[main_effects %in% colnames(design)]
+        if (length(main_effects) == 0){
+            contrast_formula <- intercept_col
+        } else {
+            contrast_formula <- paste0(intercept_col, " + ", paste(main_effects, collapse=" + "))
+        } 
+        
+        # for the interaction term itself, for one of the groups, one level is chosen as reference level and
+        # all interaction terms with that reference level are not in the design matrix and don't need to be added
+        if (group_col %in% colnames(design)){
+            contrast_formula <- paste0(contrast_formula, " + ", group_col)
+        }
+        other_group_effects <- c()
+    
+        for (other_group_col in group_cols_wo_gr){
+            # for the other groups, add the main effects and the interaction term
+            other_main_effects <- strsplit(other_group_col, ".", fixed=TRUE)[[1]]
+            other_main_effects <- other_main_effects[other_main_effects %in% colnames(design)]
+            if (length(other_main_effects) == 0){
+                other_effect <- intercept_col
+            } else {
+                other_effect <- paste0(intercept_col, " + ", paste(other_main_effects, collapse=" + "))
+            }
+
+            if (other_group_col %in% colnames(design)){
+                other_effect <- paste0(other_effect, " + ", other_group_col)
+            }
+            other_group_effects <- c(other_group_effects, other_effect)
+        } 
+        # collect the effects of all the other groups and sum then up, to then take the average
+        other_group_average <- paste0(
+            "(", paste(other_group_effects, collapse=" + "), ") / ", length(group_cols_wo_gr)
+        )
+        contrasts_all[[group_name]] <- paste0(contrast_formula, " - ", other_group_average)
+
+    } else {
+        # no interaction --> get the actual effect of the terms by adding them to the intercept 
+        # except for reference which is the intercept only
+        contrast_formula = ifelse(group_name == reference_group, intercept_col, paste0(intercept_col, " + ", group_col))
+        # collect the effects of all the other groups and sum then up, to then take the average
+        other_group_effects <- c()
+    
+        for (other_group_col in group_cols_wo_gr){
+            other_effect <- ifelse(
+                other_group_col == reference_group, intercept_col, paste0(intercept_col, " + ", other_group_col)
+            )
+            other_group_effects <- c(other_group_effects, other_effect)
+        }
+        other_group_average <- paste0(
+            "(", paste(other_group_effects, collapse=" + "), ") / ", length(group_cols_wo_gr)
+        )
+        contrasts_all[[group_name]] <- paste0(contrast_formula, " - ", other_group_average)
+    }
+    
     print(contrasts_all[[group_name]])
+
 }
 
 # generate contrast matrix based on contrast formulas and design matrix

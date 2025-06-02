@@ -45,6 +45,8 @@ rule one_vs_all_contrasts:
         eBayes = lambda w: annot_dict["{}".format(w.analysis)]["eBayes"],
         limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],
         feature_annotation_col = config["feature_annotation"]["column"],
+        formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
+        reference_levels = config["reference_levels"],
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
