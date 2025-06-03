@@ -8,6 +8,8 @@ rule dea:
         dea_results = os.path.join(result_path,'{analysis}','results.csv'),
         lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
         model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
+    wildcard_constraints:
+        analysis = "[^/]+"
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
@@ -38,9 +40,9 @@ rule one_vs_all_contrasts:
         model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
         feature_annotation = config["feature_annotation"]["path"] if config["feature_annotation"]["path"]!="" else [],
     output:
-        contrast_results = os.path.join(result_path,'{analysis}_OvA_{ova_var}','results.csv'),
-        contrast_object = os.path.join(result_path,'{analysis}_OvA_{ova_var}','lmfit_object.rds'),
-        contrast_matrix = os.path.join(result_path,'{analysis}_OvA_{ova_var}','model_matrix.csv'),
+        contrast_results = os.path.join(result_path,'OvA/{analysis}_OvA_{ova_var}','results.csv'),
+        contrast_object = os.path.join(result_path,'OvA/{analysis}_OvA_{ova_var}','lmfit_object.rds'),
+        contrast_matrix = os.path.join(result_path,'OvA/{analysis}_OvA_{ova_var}','model_matrix.csv'),
     params:
         eBayes = lambda w: annot_dict["{}".format(w.analysis)]["eBayes"],
         limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],

@@ -25,7 +25,7 @@ annot = pd.read_csv(config['annotation'], index_col='name')
 std_analyses = list(annot.index)
 # check if OvA columns exists and returns non-empty indices with postfix "_OvA"
 ova_analyses = [
-    f"{idx}_OvA_{val}"
+    f"OvA/{idx}_OvA_{val}"
     for idx, cell in annot.get('OvA', pd.Series('', index=annot.index)).fillna('').loc[lambda s: s!=''].items()
     for val in cell.split('|')
 ]
