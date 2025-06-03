@@ -26,7 +26,7 @@ fit <- readRDS(lmfit_object_path)
 design <- data.frame(fread(file.path(model_matrix_path), header=TRUE), row.names=1)
 
 ### load feature annotation file (optional)
-if (feature_annotation_path!=""){
+if (length(feature_annotation_path)!=0){
     feature_annot <- data.frame(fread(file.path(feature_annotation_path), header=TRUE), row.names=1)
     print("feature_annot")
     print(dim(feature_annot))
@@ -226,7 +226,7 @@ for(coefx in colnames(coef(fit2))){
     tmp_res$group <- names(contrasts_all)[contrasts_all == coefx]
 
     # add feature_name
-    if (feature_annotation_path!=""){
+    if (length(feature_annotation_path)!=0){
         tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation_col]
     }
     
