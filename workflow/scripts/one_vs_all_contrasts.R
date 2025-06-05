@@ -21,6 +21,8 @@ eBayes_flag <- snakemake@params[["eBayes"]] #1
 limma_trend <- snakemake@params[["limma_trend"]] #0
 formula <- snakemake@params[["formula"]]
 
+
+
 #### load data (model, design and feature_annotation)
 fit <- readRDS(lmfit_object_path)
 design <- data.frame(fread(file.path(model_matrix_path), header=TRUE), row.names=1)
@@ -105,7 +107,6 @@ for (i in seq(length(group_names))){
         # reference group), where the relative effect for the reference group itself is 0 (in the contrast formula just
         # falls away, but is counted for the denominator in the mean).
     
-    
         reference_group <- setdiff(group_cols, colnames(design))
         if (length(reference_group) != 1) {
             # something went wrong
@@ -119,19 +120,24 @@ for (i in seq(length(group_names))){
         
         # collect the effects of all the other groups and sum then up, to then take the average
         other_group_effects <- c()
-    
         for (other_group_col in group_cols_wo_gr){
             if (other_group_col == reference_group) {
                 # if the other group is the reference group, it does not contribute to the contrast formula
-                # so we just skip it (don't add empty string to avoid `+ "" +`)
+                # so we just skip it (don't add empty string to avoid `+  +`)
                 next
             }
             other_group_effects <- c(other_group_effects, other_group_col)
         }
-        other_group_average <- paste0(
-            "(", paste(other_group_effects, collapse=" + "), ") / ", length(group_cols_wo_gr)
-        )
-        contrasts_all[[group_name]] <- paste0(self_relative_effect, " - ", other_group_average)        
+        
+        if (length(other_group_effects) == 0){
+            # if there are only two levels and one is the reference, only one term remains for the contrast formula
+            contrasts_all[[group_name]] <- self_relative_effect
+        } else {
+            other_group_average <- paste0(
+                "(", paste(other_group_effects, collapse=" + "), ") / ", length(group_cols_wo_gr)
+            )
+            contrasts_all[[group_name]] <- paste0(self_relative_effect, " - ", other_group_average)        
+        }
 
     } else if (ova_is_interaction) {
         # if the current OvA term is an interaction, need to find all the columns that contribute to a group, i.e., 
@@ -152,8 +158,9 @@ for (i in seq(length(group_names))){
         if (group_col %in% colnames(design)){
             contrast_formula <- paste0(contrast_formula, " + ", group_col)
         }
+        
+        # find the mean effect of all other groups
         other_group_effects <- c()
-    
         for (other_group_col in group_cols_wo_gr){
             # for the other groups, add the main effects and the interaction term
             other_main_effects <- strsplit(other_group_col, ".", fixed=TRUE)[[1]]
@@ -163,22 +170,23 @@ for (i in seq(length(group_names))){
                 other_main_effects <- c(other_main_effects, other_group_col)
             }
             
-            if (length(other_main_effects) > 0){
-                other_group_effects <- c(other_group_effects, paste0(other_main_effects, collapse=" + "))
-            }
-            
+            other_group_effects <- c(other_group_effects, other_main_effects)
         } 
-        # collect the effects of all the other groups and sum then up, to then take the average
-        other_group_average <- paste0(
-            "(", paste(other_group_effects, collapse=" + "), ") / ", length(group_cols_wo_gr)
-        )
-        contrasts_all[[group_name]] <- paste0(contrast_formula, " - ", other_group_average)
+        if (length(other_group_effects) == 0){
+            contrasts_all[[group_name]] <- contrast_formula
+        } else {         
+            # collect the effects of all the other groups and sum then up, to then take the average
+            other_group_average <- paste0(
+                "(", paste(other_group_effects, collapse=" + "), ") / ", length(group_cols_wo_gr)
+            )
+            contrasts_all[[group_name]] <- paste0(contrast_formula, " - ", other_group_average)
+        }
 
     } else {
-        # this should not happen, but just in case
-        stop(paste0("Unknown contrast type for variable '", ova_var, "'"))
+        stop(paste0("Term type unknown for '", ova_var, "'"))
     }
     
+    print(paste0("Contrast for group '", group_name, "': "))
     print(contrasts_all[[group_name]])
 
 }
