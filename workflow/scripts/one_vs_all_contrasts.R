@@ -22,10 +22,42 @@ limma_trend <- snakemake@params[["limma_trend"]] #0
 formula <- snakemake@params[["formula"]]
 
 
+print(paste0('ova_var: ', ova_var))
+print(paste0('length(feature_annotation_path): ', length(feature_annotation_path)))
+print(paste0('feature_annotation_col: ', feature_annotation_col))
+print(paste0('eBayes_flag: ', eBayes_flag))
+print(paste0('limma_trend: ', limma_trend))
+print(paste0('formula: ', formula))
+
+
+# find out if there is a term that was modelled as a means model and if yes, which metadata column that was
+# i.e., which is the first non-interaction term in the formula
+is_means_model <- attributes(terms(formula(formula)))$intercept == 0
+all_terms <- attributes(terms(formula(formula)))$term.labels
+means_model_term <- FALSE
+if (is_means_model){    
+    for (i in 1:length(all_terms)){
+        term <- all_terms[i]
+        if (grepl(":", term, fixed=TRUE)){
+            # interaction term, skip
+            next
+        }
+        means_model_term <- gsub(" ", "", term)
+        break
+    }
+}
+print(paste0("Means model term: ", means_model_term))
+# is the current OvA terms is the one that's modelled as a means model
+ova_is_means_model <- ova_var == means_model_term
+
 
 #### load data (model, design and feature_annotation)
 fit <- readRDS(lmfit_object_path)
 design <- data.frame(fread(file.path(model_matrix_path), header=TRUE), row.names=1)
+
+# fit still has : in the column names since it was read from a RDS, but the design matrix replaced them
+# since it is a dataframe (read.csv would do so as well) --> adapt the fit object to match
+colnames(fit$coefficients) <- make.names(colnames(fit$coefficients))
 
 ### load feature annotation file (optional)
 if (length(feature_annotation_path)!=0){
@@ -48,6 +80,10 @@ if (ova_is_interaction){
     # for interaction terms, need to generate all combinations of the levels
     # there could be multiple colons in the variable name for high-order interaction terms
     ova_vars <- unlist(strsplit(ova_var, ':'))
+    # the ova_vars need to be sorted in the order their main effects appear in the formula so that
+    # the naming is actually in the correct order 
+    ova_vars <- ova_vars[order(match(ova_vars, all_terms))]
+    # get the unique levels of each variable in the metadata
     individual_group_levels <- lapply(ova_vars, function(var) {
         unique(meta[, var])
     })
@@ -66,26 +102,6 @@ if (ova_is_interaction){
     group_names <- base::make.names(unique(meta[,ova_var]))
     group_cols <- base::make.names(paste0(ova_var, group_names))
 }
-
-# find out if there is a term that was modelled as a means model and if yes, which metadata column that was
-# i.e., which is the first non-interaction term in the formula
-is_means_model <- grepl("~*0", formula)
-all_terms <- unlist(strsplit(formula, "\\+")) 
-means_model_term <- FALSE
-if (is_means_model){    
-    for (i in 2:length(all_terms)){
-        term <- all_terms[i]
-        if (grepl(":", term, fixed=TRUE)){
-            # interaction term, skip
-            next
-        }
-        means_model_term <- gsub(" ", "", term)
-        break
-    }
-}
-print(paste0("Means model term: ", means_model_term))
-# is the current OvA terms is the one that's modelled as a means model
-ova_is_means_model <- ova_var == means_model_term
 
 #### define contrasts
 contrasts_all <- list()
