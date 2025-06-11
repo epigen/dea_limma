@@ -9,7 +9,7 @@ rule dea:
         lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
         model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
     wildcard_constraints:
-        analysis = "^(?!.*_OvA_)+$"
+        analysis = "(?!.*_OvA_).*"
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
