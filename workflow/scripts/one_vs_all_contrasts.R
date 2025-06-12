@@ -21,25 +21,6 @@ eBayes_flag <- snakemake@params[["eBayes"]] #1
 limma_trend <- snakemake@params[["limma_trend"]] #0
 formula <- snakemake@params[["formula"]]
 
-# eBayes_flag <- 1 # HACK
-# limma_trend <- 0 # HACK
-# feature_annotation_path <- c() # HACK
-# feature_annotation_col <- 'X' # HACK
-# model_matrix_path <- 'results/differential_expression/dea_limma/testing_ova_dea__comparison1_0/model_matrix.csv' # HACK
-# lmfit_object_path <- 'results/differential_expression/dea_limma/testing_ova_dea__comparison1_0/lmfit_object.rds' # HACK
-# ova_var <- 'cell_type' # HACK
-# metadata_path <- 'results/differential_expression/spilterlize_integrate/matched_cell_types/L4/spilterlize_integrate/all/annotation.csv' # HACK
-# formula <- '~ 0 + cell_type + sample_type + cell_type:sample_type + sex + pre_treatment + TNM_T_size + TNM_N_nodes + age_group + pathology_WHO + proximal_or_distal' # HACK
-# i <- 1 # HACK
-# contrast_result_path <- 'results/tmp/contrast_results.csv' # HACK
-# contrast_object_path <- 'results/tmp/contrast_object.rds' # HACK
-# contrast_matrix_path <- 'results/tmp/contrast_matrix.csv' # HACK
-
-# results <- read.csv('results/differential_expression/dea_limma/testing_ova_dea__comparison1_0/results.csv', header=TRUE)  # HACK
-# print(table(results[(results$adj.P.Val <= 0.05) & (abs(results$logFC) >= 2) & (results$AveExpr >= 0),]$group)) # HACK
-# contrast_result_loaded <- read.csv('results/differential_expression/dea_limma/OvA/testing_ova_dea__comparison1_0_OvA_cell_type/results.csv', header=TRUE)  # HACK
-# print(table(contrast_result_loaded[(contrast_result_loaded$adj.P.Val <= 0.05) & (abs(contrast_result_loaded$logFC) >= 2) & (contrast_result_loaded$AveExpr >= 0),]$group)) # HACK
-
 print(paste0('ova_var: ', ova_var))
 print(paste0('length(feature_annotation_path): ', length(feature_annotation_path)))
 print(paste0('feature_annotation_col: ', feature_annotation_col))
@@ -154,7 +135,6 @@ for (i in seq(length(group_names))){
         
         # collect the effects of all the other groups and sum then up, to then take the average
         other_group_effects <- c()
-        # HACK group_cols_wo_gr <- c()
         for (other_group_col in group_cols_wo_gr){
             if (other_group_col == reference_group) {
                 # if the other group is the reference group, it does not contribute to the contrast formula
@@ -196,7 +176,6 @@ for (i in seq(length(group_names))){
         
         # find the mean effect of all other groups
         other_group_effects <- c()
-        # HACK other_group_col <- group_cols_wo_gr[1]
         for (other_group_col in group_cols_wo_gr){
             # for the other groups, add the main effects and the interaction term
             other_main_effects <- strsplit(other_group_col, ".", fixed=TRUE)[[1]]
@@ -284,6 +263,5 @@ for(coefx in colnames(coef(fit2))){
 # remove rows with adj.P.Val=NA
 contrast_result <- contrast_result[!is.na(contrast_result$adj.P.Val),]
 
-# table(contrast_result[(contrast_result$adj.P.Val <= 0.05) & (abs(contrast_result$logFC) >= 2) & (contrast_result$AveExpr >= 0),]$group)  # HACK
 #### save results
 fwrite(as.data.frame(contrast_result), file=file.path(contrast_result_path), row.names=FALSE)
