@@ -22,6 +22,7 @@ A [Snakemake 8](https://snakemake.readthedocs.io/en/stable/) workflow for perfor
 # 🖋️ Authors
 - [Stephan Reichl](https://github.com/sreichl)
 - [Lukas Folkman](https://github.com/lukas-folkman)
+- [Raphael Bednarsky](https://github.com/bednarsky)
 - [Christoph Bock](https://github.com/chrbock)
 
 

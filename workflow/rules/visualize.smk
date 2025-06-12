@@ -33,15 +33,16 @@ rule lfc_heatmap:
     input:
         dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
-        dea_lfc_heatmap = report(os.path.join(result_path,'{analysis}','plots','heatmap','{feature_list}.png'),
-                              caption="../report/lfc_heatmap.rst",
-                              category="{}_{}".format(config["project_name"], module_name),
-                              subcategory="{analysis}",
-                              labels={
-                                  "name": "Heatmap",
-                                  "type": "Effect sizes",
-                                  "misc": "{feature_list}",
-                              }),
+        dea_lfc_heatmap = #report( # report contains the following warning everywhere, hence excluded from report: <string>:191: (WARNING/2) Duplicate explicit target name: "filtered.png".
+            os.path.join(result_path,'{analysis}','plots','heatmap','{feature_list}.png'),
+                              # caption="../report/lfc_heatmap.rst",
+                              # category="{}_{}".format(config["project_name"], module_name),
+                              # subcategory="{analysis}",
+                              # labels={
+                              #     "name": "Heatmap",
+                              #     "type": "Effect sizes",
+                              #     "misc": "{feature_list}",
+                              # }),
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
