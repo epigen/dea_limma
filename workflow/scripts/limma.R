@@ -44,7 +44,7 @@ print("metadata")
 print(dim(metadata))
 
 ### load feature annotation file (optional)
-if (feature_annotation_path!=""){
+if (length(feature_annotation_path)!=0){
     feature_annot <- data.frame(fread(file.path(feature_annotation_path), header=TRUE), row.names=1)
     print("feature_annot")
     print(dim(feature_annot))
@@ -197,7 +197,7 @@ for(coefx in colnames(coef(lmfit))){
         rownames(tmp_res) <- NULL
         tmp_res$group <- gsub(":", "__", coefx) # replace colon with double-underscore
         
-        if (feature_annotation_path!=""){
+        if (length(feature_annotation_path)!=0){
             tmp_res$feature_name <- feature_annot[tmp_res$feature, feature_annotation_col]
         }
     

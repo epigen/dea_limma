@@ -8,6 +8,8 @@ rule dea:
         dea_results = os.path.join(result_path,'{analysis}','results.csv'),
         lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
         model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
+    wildcard_constraints:
+        analysis = "(?!.*_OvA_).*"
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
@@ -33,6 +35,7 @@ rule dea:
 # performs a one-vs-all (OvA) differential analysis using contrasts based on the previous model
 rule one_vs_all_contrasts:
     input:
+        metadata = get_metadata_path,
         lmfit_object = os.path.join(result_path,'{analysis}','lmfit_object.rds'),
         model_matrix = os.path.join(result_path,'{analysis}','model_matrix.csv'),
         feature_annotation = config["feature_annotation"]["path"] if config["feature_annotation"]["path"]!="" else [],
@@ -44,6 +47,8 @@ rule one_vs_all_contrasts:
         eBayes = lambda w: annot_dict["{}".format(w.analysis)]["eBayes"],
         limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],
         feature_annotation_col = config["feature_annotation"]["column"],
+        formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
+        reference_levels = config["reference_levels"],
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
