@@ -73,7 +73,7 @@ The workflow performs the following steps that produce the outlined results:
   - (optional) save feature score tables (with two columns: "feature" and "score") per comparison group using score_formula for downstream analyses (eg ranked enrichment analysis) (CSV).
     - (optional) annotated feature scores tables (with two columns: "feature_name" and "score") with suffix "_annot" (CSV).
   - (optional) One-vs-all (OvA) analysis on modeled and specified covariates using contrasts, enabling automated comparison of each group against all others for a given term (e.g., cell types). This is implemented to work for all terms in a model, including interactions, but not numerical covariates (not possible). A separate result folder `{name}_OvA_{variable}` is generated per `variable` (i.e., term).
-    - example use-case: TODO
+    - example use-case: You have RNA-seq samples of multiple cell types and want to find a signature of genes that is up- or downregulated per cell type compared to the average of all other cell types, while controling for covariates like batch or donor.
 - DEA result statistics: total number of statistically significant features and split by positive (up) and negative (down) change (CSV).
 - DEA result filtering of features (e.g., genes) by 
   - statistical significance (<= adjusted p-value: `adj_pval`)
