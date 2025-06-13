@@ -22,7 +22,6 @@ rule dea:
         reference_levels = config["reference_levels"],
         formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
         block_var = lambda w: annot_dict["{}".format(w.analysis)]["block_var"],
-        # comparisons = lambda w: annot_dict["{}".format(w.analysis)]["comparisons"],
         # protect against empty comparison variable
         comparisons = lambda w: annot_dict[str(w.analysis)]["comparisons"] if isinstance(annot_dict[str(w.analysis)]["comparisons"], str) else "",
         calcNormFactors_method = lambda w: annot_dict["{}".format(w.analysis)]["calcNormFactors_method"],
@@ -48,7 +47,6 @@ rule one_vs_all_contrasts:
         limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],
         feature_annotation_col = config["feature_annotation"]["column"],
         formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
-        reference_levels = config["reference_levels"],
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)

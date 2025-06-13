@@ -62,7 +62,7 @@ The workflow performs the following steps that produce the outlined results:
   - (optional) calculation of normalization factors using __edgeR::calcNormFactors__.
   - (optional) calculation of precision weights to model the mean-variance relationship in order to make linear models "applicable" to count data (weighted least squares) using __voom__.
   - (optional) __block__ on a "group" factor in case you have repeated measurements (generalized least squares).
-      - example use-case: you have N donors and T timepoints for each donor and want to model donor specific information like age, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
+      - example use-case: you have `N` donors and `T` timepoints for each donor and want to model donor specific information like __age__, but still want to account for the variable __donor__ ie ~&nbsp;*timepoint*&nbsp;+&nbsp;*age*&nbsp;+&nbsp;*donor* is overdetermined hence the formula becomes ~&nbsp;*timepoint*&nbsp;+&nbsp;*age* and you "block" on __donor__.
   - fit linear models (ordinary least squares) with the design derived from the configured formula (expects "normal" data) using __lmFit__.
       - the fitted model object is saved (lmfit_object.rds) for alternative downstream analyses or manual inspection e.g., contrasts (see instructions below in [Contrasts](#contrasts)).
   - (optional) improve variance estimation using __eBayes__ with the robustness flag (`robust=TRUE`), which applies a robust empirical Bayes approach that downweights extreme variance estimates via winsorization, stabilizing hyperparameters across all genes (i.e., shrinking them toward a common value) and yielding moderated t-statistics and p-values that are more reliable in heterogeneous datasets.
@@ -72,7 +72,8 @@ The workflow performs the following steps that produce the outlined results:
     - (optional) annotated feature list with suffix "_annot" (TXT).
   - (optional) save feature score tables (with two columns: "feature" and "score") per comparison group using score_formula for downstream analyses (eg ranked enrichment analysis) (CSV).
     - (optional) annotated feature scores tables (with two columns: "feature_name" and "score") with suffix "_annot" (CSV).
-  - (optional) One-vs-all (OvA) analysis on modeled and specified covariates using contrasts, enabling automated comparison of each group against all others for a given term (e.g., cell types). This is implemented to work for all terms in a model, including interactions. 
+  - (optional) One-vs-all (OvA) analysis on modeled and specified covariates using contrasts, enabling automated comparison of each group against all others for a given term (e.g., cell types). This is implemented to work for all terms in a model, including interactions, but not numerical covariates (not possible). A separate result folder `{name}_OvA_{variable}` is generated per `variable` (i.e., term).
+    - example use-case: TODO
 - DEA result statistics: total number of statistically significant features and split by positive (up) and negative (down) change (CSV).
 - DEA result filtering of features (e.g., genes) by 
   - statistical significance (<= adjusted p-value: `adj_pval`)
@@ -84,10 +85,10 @@ The workflow performs the following steps that produce the outlined results:
       - highlighting features according to configured cut-offs for statistical significance (pCutoff) and effect size (FCcutoff)
       - (optional) highlighting features according to configured feature lists
   - hierarchically clustered heatmap of effect sizes (LFC) per comparison (features x comparisons) indicating statistical significance with a star '\*'
-      - using all relevant features (FILTERED)
+      - using all filtered features based on the `config` (`FILTERED`)
       - (optional) using configured feature lists
       - in case of more than 100 features the row labels and significance indicators (\*) are removed
-      - in case of more than 50000 features no heatmap is generated
+      - in case of more than 50,000 features no heatmap is generated
   - diagnostic quality control plots
       - (optional) voom mean-variance trend
       - (optional) intermediate mean-variance trend, in case of blocking and vooming

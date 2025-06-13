@@ -17,17 +17,27 @@ contrast_matrix_path <- snakemake@output[["contrast_matrix"]]
 # parameters
 ova_var <- snakemake@wildcards[["ova_var"]]
 feature_annotation_col <- base::make.names(snakemake@params[["feature_annotation_col"]])[1]
-eBayes_flag <- snakemake@params[["eBayes"]] #1
-limma_trend <- snakemake@params[["limma_trend"]] #0
+eBayes_flag <- snakemake@params[["eBayes"]]
+limma_trend <- snakemake@params[["limma_trend"]]
 formula <- snakemake@params[["formula"]]
 
-print(paste0('ova_var: ', ova_var))
-print(paste0('length(feature_annotation_path): ', length(feature_annotation_path)))
-print(paste0('feature_annotation_col: ', feature_annotation_col))
-print(paste0('eBayes_flag: ', eBayes_flag))
-print(paste0('limma_trend: ', limma_trend))
-print(paste0('formula: ', formula))
+#### load data (model, design, feature_annotation and metadata)
+fit <- readRDS(lmfit_object_path)
+design <- data.frame(fread(file.path(model_matrix_path), header=TRUE), row.names=1)
+meta <- data.frame(fread(file.path(metadata_path), header=TRUE), row.names=1)
 
+# fit still has : in the column names since it was read from a RDS, but the design matrix replaced them
+# since it is a dataframe (read.csv would do so as well) --> adapt the fit object to match
+colnames(fit$coefficients) <- make.names(colnames(fit$coefficients))
+
+### load feature annotation file (optional)
+if (length(feature_annotation_path)!=0){
+    feature_annot <- data.frame(fread(file.path(feature_annotation_path), header=TRUE), row.names=1)
+    print("feature_annot")
+    print(dim(feature_annot))
+}
+
+### determine flags
 
 # find out if there is a term that was modelled as a means model and if yes, which metadata column that was
 # i.e., which is the first non-interaction term in the formula
@@ -49,26 +59,9 @@ print(paste0("Means model term: ", means_model_term))
 # is the current OvA terms is the one that's modelled as a means model
 ova_is_means_model <- ova_var == means_model_term
 
-
-#### load data (model, design and feature_annotation)
-fit <- readRDS(lmfit_object_path)
-design <- data.frame(fread(file.path(model_matrix_path), header=TRUE), row.names=1)
-
-# fit still has : in the column names since it was read from a RDS, but the design matrix replaced them
-# since it is a dataframe (read.csv would do so as well) --> adapt the fit object to match
-colnames(fit$coefficients) <- make.names(colnames(fit$coefficients))
-
-### load feature annotation file (optional)
-if (length(feature_annotation_path)!=0){
-    feature_annot <- data.frame(fread(file.path(feature_annotation_path), header=TRUE), row.names=1)
-    print("feature_annot")
-    print(dim(feature_annot))
-}
-
 ova_is_interaction <- grepl(":", ova_var, fixed=TRUE)
 
 #### identify groups for one-vs-all contrasts using the metadata table, column prefix & design matrix
-meta <- data.frame(fread(file.path(metadata_path), header=TRUE), row.names=1)
 # check if ova_var is numeric, and if yes, cause error since OvA does not make sense for continuous variables
 # ok to kill the process, since the user should not get to make this wrong choice
 if (!ova_is_interaction && is.numeric(meta[, ova_var])){
