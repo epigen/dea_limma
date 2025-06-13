@@ -8,6 +8,7 @@ import sys
 import pandas as pd
 import yaml
 from snakemake.utils import min_version
+from collections import defaultdict
 
 ##### set minimum snakemake version #####
 min_version("8.20.1")
@@ -31,6 +32,11 @@ ova_analyses = [
 ]
 # create list of all analyses
 analyses = std_analyses + ova_analyses
+
+std_analyses_to_ova_dict = defaultdict(list)
+for ova_analysis in ova_analyses:
+    std_analysis = ova_analysis.split('_OvA_')[0]
+    std_analyses_to_ova_dict[std_analysis].append(ova_analysis)
 
 # convert dictionary for parametrization of rules
 annot_dict = annot.to_dict('index')
@@ -63,6 +69,9 @@ rule all:
                          ),
         stats = expand(os.path.join(result_path,'{analysis}','stats.csv'),
                                analysis = analyses,
+                      ),
+        stats_ova = expand(os.path.join(result_path,'{analysis}', 'stats_OvA.csv'),
+                               analysis = std_analyses_to_ova_dict.keys(),
                       ),
         heatmaps = expand(os.path.join(result_path,'{analysis}','plots','heatmap','{feature_list}.png'),
                           analysis = analyses,

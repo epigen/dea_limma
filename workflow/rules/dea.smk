@@ -110,6 +110,49 @@ rule aggregate:
     script:
         "../scripts/aggregate.R"
 
+def get_input_ova_stats_plot(wildcards):
+    return [
+        os.path.join(result_path, analysis,'results.csv')
+        for analysis in std_analyses_to_ova_dict[wildcards.analysis]
+    ]
+
+rule ova_stats_plot:
+    input:
+        dea_results = get_input_ova_stats_plot,
+    output:
+        dea_stats_OvA = report(os.path.join(result_path,'{analysis}','stats_OvA.csv'), 
+                                  caption="../report/dea_stats_OvA.rst", 
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "Statistics",
+                                      "type": "table",
+                                      "misc": "CSV",
+                                  }),
+        dea_stats_plot_OvA = report(os.path.join(result_path,'{analysis}','plots','stats_OvA.png'),
+                                  caption="../report/dea_stats_OvA.rst", 
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "Statistics",
+                                      "type": "Bar plot",
+                                      "misc": "PNG",
+                                  }),
+    resources:
+        mem_mb=config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    conda:
+        "../envs/ggplot.yaml"
+    log:
+        os.path.join("logs","rules","ova_stats_plot_{analysis}.log"),
+    params:
+        score_formula = config["score_formula"],
+        adj_pval = config["filters"]["adj_pval"],
+        lfc = config["filters"]["lfc"],
+        ave_expr = config["filters"]["ave_expr"],
+        utils_path=workflow.source_path("../scripts/utils.R"),
+    script:
+        "../scripts/ova_stats_plot.R"
 
 # shadow rule to enable downstream processing
 # requires to know that the file will exist in that exact location, otherwise MissingInputException error
