@@ -80,7 +80,7 @@ The workflow performs the following steps that produce the outlined results:
   - effect size (>= absolute log 2 fold change: `lfc`)
   - average expression (>= `ave_expr`) in the data (to skip this filter use `-Inf`)
 - Visualizations
-  - filtered DEA result statistics ie number of features and direction (stacked bar plots)
+  - filtered DEA result statistics i.e. number of features and direction (stacked bar plots) (if OvA is performed, also combined for all levels of all terms in one plot)
   - volcano plots per comparison with effect size on the x-axis and raw p-value(rawp)/adjusted p-value (adjp) on the y-axis
       - highlighting features according to configured cut-offs for statistical significance (pCutoff) and effect size (FCcutoff)
       - (optional) highlighting features according to configured feature lists

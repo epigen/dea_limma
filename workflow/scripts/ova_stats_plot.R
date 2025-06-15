@@ -20,24 +20,6 @@ lfc <- as.numeric(snakemake@params[["lfc"]]) # 0
 ave_expr <- as.numeric(snakemake@params[["ave_expr"]]) # 0
 score_formula <- snakemake@params[["score_formula"]] # "-log10(dea_results$P.Value)*sign(dea_results$logFC)"
 
-
-# # FIXME remove testing params
-# dea_result_paths <- c(
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_cell_type/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_sample_type/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_proximal_or_distal/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_sex/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_pre_treatment/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_pathology_WHO/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_TNM_T_size/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_TNM_N_nodes/results.csv",
-#     "results/differential_expression/dea_limma/metadata_dea__L2__TMM__trend_OvA_age_group/results.cs"
-# )
-# adj_pval <- 0.05
-# lfc <- 0
-# ave_expr <- 0
-# score_formula <- "-log10(dea_results$P.Value)*sign(dea_results$logFC)"
-
 # plot specifications
 width <- 0.25
 height <- 5

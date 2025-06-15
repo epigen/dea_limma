@@ -25,16 +25,19 @@ configfile: os.path.join("config", "config.yaml")
 annot = pd.read_csv(config['annotation'], index_col='name')
 std_analyses = list(annot.index)
 # check if OvA columns exists and returns non-empty indices with postfix "_OvA"
-ova_analyses = [
-    f"{idx}_OvA_{val}"
+# to avoid ':' in the filepaths for interaction terms, need to replace it with '__', but remember original ova_var
+# to avoid new column naming restrictions (i.e., keep allowing '__' in column names)
+ova_analyses = {
+    f"{idx}_OvA_{val.replace(':', '__')}": val
     for idx, cell in annot.get('OvA', pd.Series('', index=annot.index)).fillna('').loc[lambda s: s!=''].items()
     for val in cell.split('|')
-]
+}
 # create list of all analyses
-analyses = std_analyses + ova_analyses
+analyses = std_analyses + list(ova_analyses.keys())
 
+# find all OvA analyses to be done and which dea they come from
 std_analyses_to_ova_dict = defaultdict(list)
-for ova_analysis in ova_analyses:
+for ova_analysis in ova_analyses.keys():
     std_analysis = ova_analysis.split('_OvA_')[0]
     std_analyses_to_ova_dict[std_analysis].append(ova_analysis)
 
