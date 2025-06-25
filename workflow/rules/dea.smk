@@ -64,7 +64,7 @@ rule aggregate:
     output:
         all_features = os.path.join(result_path,'{analysis}','feature_lists','ALL_features.txt'),
         all_features_annot = os.path.join(result_path,'{analysis}','feature_lists','ALL_features_annot.txt') if config["feature_annotation"]["path"]!="" else [],
-        feature_lists = directory(os.path.join(result_path,'{analysis}','feature_lists')),
+        # feature_lists = directory(os.path.join(result_path,'{analysis}','feature_lists')),
         dea_stats = report(os.path.join(result_path,'{analysis}','stats.csv'), 
                                   caption="../report/dea_stats.rst", 
                                   category="{}_{}".format(config["project_name"], module_name),
