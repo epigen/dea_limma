@@ -24,13 +24,14 @@ rule volcanos:
     params:
         pCutoff = config["volcano"]["pCutoff"],
         FCcutoff = config["volcano"]["FCcutoff"],
-        utils_path=workflow.source_path("../scripts/utils.R"),
+        utils_path = workflow.source_path("../scripts/utils.R"),
     script:
         "../scripts/volcanos.R"
         
 # visualize LFC of DEA results
 rule lfc_heatmap:
     input:
+        lambda wildcards: set() if wildcards.feature_list == 'FILTERED' else config["feature_lists"][wildcards.feature_list],
         dea_results = os.path.join(result_path,'{analysis}','results.csv'),
     output:
         dea_lfc_heatmap = #report( # report contains the following warning everywhere, hence excluded from report: <string>:191: (WARNING/2) Duplicate explicit target name: "filtered.png".
@@ -54,6 +55,6 @@ rule lfc_heatmap:
         adj_pval = config["filters"]["adj_pval"],
         lfc = config["filters"]["lfc"],
         ave_expr = config["filters"]["ave_expr"],
-        utils_path=workflow.source_path("../scripts/utils.R"),
+        utils_path = workflow.source_path("../scripts/utils.R"),
     script:
         "../scripts/heatmap.R"

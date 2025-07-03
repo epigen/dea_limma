@@ -1,6 +1,5 @@
 #### load libraries & utility function 
 library("pheatmap")
-# library("patchwork")
 library("ggplot2")
 library("ggplotify")
 library("reshape2")
@@ -12,7 +11,6 @@ library("data.table")
 source(snakemake@params[["utils_path"]])
 
 # inputs
-# dea_lfc_path <- snakemake@input[["dea_lfc"]]
 dea_result_path <- snakemake@input[["dea_results"]]
 
 # outputs
@@ -51,7 +49,7 @@ if (feature_list_name=="FILTERED"){
     
     # if feature annotation is used then map annotation to features
     if("feature_name" %in% colnames(dea_results)){
-        feature_list <- dea_results[match(feature_list, dea_results$feature_name), 'feature']
+        feature_list <- unique(dea_results[dea_results$feature_name %in% feature_list, 'feature'])
     }
 }
 
@@ -66,44 +64,37 @@ if(length(feature_list)==0){
     quit(save = "no", status = 0)
 }
 
+# subset DEA results according to feature list
+dea_results <- dea_results[dea_results$feature %in% feature_list, ,drop = FALSE]
 
 # make LFC dataframe
-lfc_df <- dcast(dea_results, feature ~ group, value.var = 'logFC')
+lfc_df <- reshape2::dcast(dea_results, feature ~ group, value.var = 'logFC')
 rownames(lfc_df) <- lfc_df$feature
 lfc_df$feature <- NULL
 
 # make adjusted p-value dataframe
-adjp_df <- dcast(dea_results, feature ~ group, value.var = 'adj.P.Val')
+adjp_df <- reshape2::dcast(dea_results, feature ~ group, value.var = 'adj.P.Val')
 rownames(adjp_df) <- adjp_df$feature
 adjp_df$feature <- NULL
 
-# subset dataframes according to feature list
-lfc_df <- lfc_df[feature_list, ,drop = FALSE]
-adjp_df <- adjp_df[feature_list, ,drop = FALSE]
-
-# set NA values to 0 (NA because below LFC threshold during testing or filtering)
+# set NA values to 0 (NA because below LFC threshold during testing or filtering -> can this still happen?)
 lfc_df[is.na(lfc_df)] <- 0
 
 # indicate significance
 adjp_df[adjp_df<=adj_pval] <- "*"
 adjp_df[adjp_df>adj_pval] <- ""
-adjp_df[is.na(adjp_df)] <- ""
+adjp_df[is.na(adjp_df)] <- "" # can this still happen?
 
 ### visualize LFC of DEA results as heatmap
 height_panel <-  if (nrow(lfc_df)<100) (height * nrow(lfc_df) + 2) else 5
 width_panel <- width * ncol(lfc_df) + 2
 
-# format colnames for plotting
-# colnames(lfc_df) <- sapply(colnames(lfc_df), addline_format)
-
 # format rownames for plotting
 if("feature_name" %in% colnames(dea_results)){
     labels_row <- dea_results[match(rownames(lfc_df), dea_results$feature), 'feature_name']
-
 }else{
     labels_row <- rownames(lfc_df)
 }                                     
-
 
 # make heatmap only if less than 50000 features
 if(nrow(lfc_df)<50000){
@@ -133,7 +124,7 @@ if(nrow(lfc_df)<50000){
 }
 
 # save plot
-# options(repr.plot.width=width_panel, repr.plot.height=height)
+# options(repr.plot.width=width_panel, repr.plot.height=height_panel)
 # print(lfc_heatmap)
 
 ggsave_new(filename = feature_list_name, 
