@@ -81,8 +81,8 @@ The workflow performs the following steps that produce the outlined results:
   - effect size (>= absolute log 2 fold change: `lfc`)
   - average expression (>= `ave_expr`) in the data (to skip this filter use `-Inf`)
 - Visualizations
-  - filtered DEA result statistics ie number of features and direction (stacked bar plots)
-  - volanco plots per comparison with effect size on the x-axis and raw p-value(rawp)/adjusted p-value (adjp) on the y-axis
+  - filtered DEA result statistics i.e. number of features and direction (stacked bar plots) (if OvA is performed, also combined for all levels of all terms in one plot)
+  - volcano plots per comparison with effect size on the x-axis and raw p-value(rawp)/adjusted p-value (adjp) on the y-axis
       - highlighting features according to configured cut-offs for statistical significance (pCutoff) and effect size (FCcutoff)
       - (optional) highlighting features according to configured feature lists
   - hierarchically clustered heatmap of effect sizes (LFC) per comparison (features x comparisons) indicating statistical significance with a star '\*'
@@ -103,14 +103,14 @@ The workflow performs the following steps that produce the outlined results:
 
 # 🛠️ Usage
 Here are some tips for the usage of this workflow:
-- _limma_ usage and best practices are not explained. For deatiled documentation, tutorials and insctructions see [Resources](#resources). To understand the implementation at hand see [limma.R](./workflow/scripts/limma.R).
+- _limma_ usage and best practices are not explained. For detailed documentation, tutorials and instructions see [Resources](#resources). To understand the implementation at hand see [limma.R](./workflow/scripts/limma.R).
 - Perform your first run(s) with loose filtering options/cut-offs and use the same for visualization to see if further filtering is even necessary or useful.
 - Test minimal complex configurations on a subset of your data.
 - Start with simple models and try to understand the results.
 
 # ⚖️ Contrasts
 Currently, we do not support contrasts. If you have any idea how to implement contrasts, feel invited to reach out.
-If you require contrasts to ask questions your model does not answer, just load the fitted model and perform the contrast manually (see examle in [_limma's_ User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf) chapter 9.5):
+If you require contrasts to ask questions your model does not answer, just load the fitted model and perform the contrast manually (see example in [_limma's_ User's Guide](https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf) chapter 9.5):
 ```R
 # load model and design
 fit <- readRDS(file.path('{result_path}/dea_limma/{analysis}/lmfit_object.rds'))

@@ -47,6 +47,8 @@ rule one_vs_all_contrasts:
         limma_trend = lambda w: annot_dict["{}".format(w.analysis)]["limma_trend"],
         feature_annotation_col = config["feature_annotation"]["column"],
         formula = lambda w: annot_dict["{}".format(w.analysis)]["formula"],
+        reference_levels = config["reference_levels"],
+        original_ova_var = lambda w: ova_analyses[f"{w.analysis}_OvA_{w.ova_var}"]
     resources:
         mem_mb=config.get("mem", "16000"),
     threads: config.get("threads", 1)
@@ -110,6 +112,43 @@ rule aggregate:
     script:
         "../scripts/aggregate.R"
 
+rule ova_stats_plot:
+    input:
+        dea_results = get_input_ova_stats_plot,
+    output:
+        dea_stats_OvA = report(os.path.join(result_path,'{analysis}','stats_OvA.csv'), 
+                                  caption="../report/dea_stats_OvA.rst", 
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "Statistics",
+                                      "type": "table",
+                                      "misc": "CSV",
+                                  }),
+        dea_stats_plot_OvA = report(os.path.join(result_path,'{analysis}','plots','stats_OvA.png'),
+                                  caption="../report/dea_stats_OvA.rst", 
+                                  category="{}_{}".format(config["project_name"], module_name),
+                                  subcategory="{analysis}",
+                                  labels={
+                                      "name": "Statistics",
+                                      "type": "Bar plot",
+                                      "misc": "PNG",
+                                  }),
+    resources:
+        mem_mb=config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    conda:
+        "../envs/ggplot.yaml"
+    log:
+        os.path.join("logs","rules","ova_stats_plot_{analysis}.log"),
+    params:
+        score_formula = config["score_formula"],
+        adj_pval = config["filters"]["adj_pval"],
+        lfc = config["filters"]["lfc"],
+        ave_expr = config["filters"]["ave_expr"],
+        utils_path=workflow.source_path("../scripts/utils.R"),
+    script:
+        "../scripts/ova_stats_plot.R"
 
 # shadow rule to enable downstream processing
 # requires to know that the file will exist in that exact location, otherwise MissingInputException error

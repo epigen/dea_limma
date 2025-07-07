@@ -15,7 +15,7 @@ contrast_object_path <- snakemake@output[["contrast_object"]]
 contrast_matrix_path <- snakemake@output[["contrast_matrix"]]
 
 # parameters
-ova_var <- snakemake@wildcards[["ova_var"]]
+ova_var <- snakemake@params[["original_ova_var"]]
 feature_annotation_col <- base::make.names(snakemake@params[["feature_annotation_col"]])[1]
 eBayes_flag <- snakemake@params[["eBayes"]]
 limma_trend <- snakemake@params[["limma_trend"]]
@@ -64,14 +64,17 @@ ova_is_interaction <- grepl(":", ova_var, fixed=TRUE)
 #### identify groups for one-vs-all contrasts using the metadata table, column prefix & design matrix
 # check if ova_var is numeric, and if yes, cause error since OvA does not make sense for continuous variables
 # ok to kill the process, since the user should not get to make this wrong choice
-if (!ova_is_interaction && is.numeric(meta[, ova_var])){
-    stop(paste0("One-vs-all contrasts do not make sense for numeric (non-factor) variable '", ova_var))
+# split in case this is an interaction term, i.e., contains a colon
+ova_vars <- unlist(strsplit(ova_var, ':'))
+for (var in ova_vars){
+    if (is.numeric(meta[, var])){
+        stop(paste0("One-vs-all contrasts do not make sense for numeric (non-factor) variable '", var, "'"))
+    }
 }
 
 if (ova_is_interaction){
     # for interaction terms, need to generate all combinations of the levels
     # there could be multiple colons in the variable name for high-order interaction terms
-    ova_vars <- unlist(strsplit(ova_var, ':'))
     # the ova_vars need to be sorted in the order their main effects appear in the formula so that
     # the naming is actually in the correct order 
     ova_vars <- ova_vars[order(match(ova_vars, all_terms))]
@@ -84,14 +87,14 @@ if (ova_is_interaction){
     # the design matrix is saved with : in the column names for interaction terms, but fread replaces them with .
     # this is based on the make.names() function, so use it here as well to make exactly the same names
     group_names <- apply(level_combinations, 1, function(row) {
-        base::make.names(paste(row, collapse = ":"))
+        paste(row, collapse = ":")
     })
     # add prefix to match the design matrix
     group_cols <- apply(level_combinations, 1, function(row) {
         base::make.names(paste0(ova_vars, row, collapse = ":"))
     })
 } else {
-    group_names <- base::make.names(unique(meta[,ova_var]))
+    group_names <- unique(meta[,ova_var])
     group_cols <- base::make.names(paste0(ova_var, group_names))
 }
 
@@ -115,7 +118,7 @@ for (i in seq(length(group_names))){
         # reference group), where the relative effect for the reference group itself is 0 (in the contrast formula just
         # falls away, but is counted for the denominator in the mean).
     
-        reference_group <- setdiff(group_cols, colnames(design))
+        group <- setdiff(group_cols, colnames(design))
         if (length(reference_group) != 1) {
             # something went wrong
             stop("There should be exactly one reference group in the design matrix.")
@@ -257,4 +260,5 @@ for(coefx in colnames(coef(fit2))){
 contrast_result <- contrast_result[!is.na(contrast_result$adj.P.Val),]
 
 #### save results
+contrast_result$group <- gsub("\\.", "__", contrast_result$group)
 fwrite(as.data.frame(contrast_result), file=file.path(contrast_result_path), row.names=FALSE)
