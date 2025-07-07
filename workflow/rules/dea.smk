@@ -112,12 +112,6 @@ rule aggregate:
     script:
         "../scripts/aggregate.R"
 
-def get_input_ova_stats_plot(wildcards):
-    return [
-        os.path.join(result_path, analysis,'results.csv')
-        for analysis in std_analyses_to_ova_dict[wildcards.analysis]
-    ]
-
 rule ova_stats_plot:
     input:
         dea_results = get_input_ova_stats_plot,

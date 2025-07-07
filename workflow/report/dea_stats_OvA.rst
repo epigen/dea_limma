@@ -1,0 +1,1 @@
+Statistics and visualizations of one-versus-all (OvA) DEA results of analysis {{snakemake.wildcards["analysis"]}} using adjusted p-value <= {{snakemake.params["adj_pval"]}}, abs(log2 fold change) >= {{snakemake.params["lfc"]}} and average expression >= {{snakemake.params["ave_expr"]}}.
