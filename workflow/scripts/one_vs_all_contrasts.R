@@ -118,7 +118,7 @@ for (i in seq(length(group_names))){
         # reference group), where the relative effect for the reference group itself is 0 (in the contrast formula just
         # falls away, but is counted for the denominator in the mean).
     
-        group <- setdiff(group_cols, colnames(design))
+        reference_group <- setdiff(group_cols, colnames(design))
         if (length(reference_group) != 1) {
             # something went wrong
             stop("There should be exactly one reference group in the design matrix.")
