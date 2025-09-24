@@ -211,8 +211,7 @@ Explore detailed examples showcasing module usage in our comprehensive end-to-en
 
 # 📑 Publications
 The following publications successfully used this module for their analyses.
-- [FirstAuthors et al. (202X) Journal Name - Paper Title.](https://doi.org/10.XXX/XXXX)
-- ...
+- [Datlinger, Pankevich, Arnold et al. (2025) Nature - Systematic discovery of CRISPR-boosted CAR T cell immunotherapies](https://www.nature.com/articles/s41586-025-09507-9)
 
 # ⭐ Star History
 
