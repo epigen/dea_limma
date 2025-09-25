@@ -41,13 +41,19 @@ if(nrow(dea_results)==0){
     # loop only over named entries (i.e., non-empty names)
     for (name in names(snakemake@output[nzchar(names(snakemake@output))])) {
         path <- as.character(snakemake@output[[name]])
+
+        # skip iteration if the path is empty or invalid
+        if (length(path) == 0) {
+            next
+        }
+        
         # skip file creation for directories
         if (name %in% c("dea_pvalue_plot", "feature_lists")) {
             dir.create(path, recursive=TRUE, showWarnings=FALSE)
         }else{
             dir.create(dirname(path), recursive=TRUE, showWarnings=FALSE)
             file.create(path, showWarnings = FALSE)
-            }
+        }
     }
     quit(save = "no", status = 0)
 }
